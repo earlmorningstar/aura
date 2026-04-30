@@ -146,8 +146,6 @@ STRIPE_SECRET_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 ```
 
-> Never use `NEXT_PUBLIC_` prefix for secret keys. Only `SUPABASE_URL` and `SUPABASE_ANON_KEY` are safe to expose to the client.
-
 ### Supabase Setup
 
 1. Create a new project at [supabase.com](https://supabase.com)

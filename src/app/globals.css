@@ -1,39 +1,4 @@
-/* @import "./styles/design-tokens.css";
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-@layer base {
-  body {
-    @apply bg-[#050505] text-zinc-100 antialiased;
-  }
-}
-
-@layer components {
-  .glass {
-    background: rgba(var(--glass-bg), var(--glass-opacity));
-    backdrop-filter: blur(24px);
-    border: 1px solid rgba(var(--glass-border), var(--glass-border-opacity));
-    box-shadow: 
-      0 8px 32px -4px rgb(0 0 0 / 0.2),
-      0 0 0 1px rgb(255 255 255 / 0.05) inset;
-  }
-  
-  .glass-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .glass-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 20px 25px -5px rgb(0 245 255 / 0.1),
-      0 8px 10px -6px rgb(168 85 247 / 0.1);
-  }
-} */
-
-
+@import "../styles/design-tokens.css";
 
 /**
  * Aura — Global Styles
@@ -42,16 +7,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import "../styles/design-tokens.css";
-
-/* ─── Fonts ───────────────────────────────────────────────────────
-   Self-hosted via next/font is preferred in layout.tsx.
-   These @imports are a fallback for any non-Next rendering contexts.
-   ──────────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
-
-
 
 /* ═══════════════════════════════════════════════════════════════
    BASE LAYER
