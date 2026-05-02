@@ -374,23 +374,6 @@ export function FeatureGrid() {
           );
         })}
       </AnimatedGroup>
-
-      {/* Assurance line */}
-      <motion.p
-        className="mt-12 text-center text-sm flex items-center justify-center gap-2"
-        style={{ color: "var(--text-muted)" }}
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.4 }}
-      >
-        <span
-          className="inline-block h-1.5 w-1.5 rounded-full"
-          style={{ background: "var(--status-success)" }}
-          aria-hidden
-        />
-        No credit card required · Cancel any time · 14-day free trial
-      </motion.p>
     </section>
   );
 }
@@ -428,12 +411,21 @@ export function SocialProof() {
         className="mx-auto grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4"
       >
         {stats.map((stat) => (
-          <AnimatedItem key={stat.label} variant="scaleIn">
-            <div
-              className="flex flex-col gap-1.5 rounded-2xl p-6 text-center"
+          <AnimatedItem key={stat.label} variant="scaleIn" className="h-full">
+            <motion.div
+              className="flex flex-col gap-1.5 rounded-2xl p-6 h-full"
               style={{
                 background: "rgba(var(--glass-bg-rgb) / 0.05)",
+                backdropFilter: "blur(var(--glass-blur-sm))",
+                WebkitBackdropFilter: "blur(var(--glass-blur-sm))",
                 border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+              }}
+              whileHover={{
+                background: "rgba(var(--glass-bg-rgb) / 0.08)",
+                borderColor: "rgba(var(--glass-border-rgb) / 0.14)",
+                y: -3,
+                transition: { type: "spring", stiffness: 400, damping: 26 },
               }}
             >
               {/* Accent dash */}
@@ -442,9 +434,8 @@ export function SocialProof() {
                 style={{ background: "var(--accent-cyan)" }}
                 aria-hidden
               />
-
               <span
-                className="font-display font-bold"
+                className="font-display font-bold text-center"
                 style={{
                   fontSize: "var(--text-2xl)",
                   letterSpacing: "var(--tracking-tight)",
@@ -454,21 +445,259 @@ export function SocialProof() {
                 {stat.value}
               </span>
               <span
-                className="text-xs font-medium"
+                className="text-xs font-medium text-center"
                 style={{ color: "var(--text-secondary)" }}
               >
                 {stat.label}
               </span>
               <span
-                className="text-[11px] leading-relaxed"
+                className="text-[11px] leading-relaxed text-center"
                 style={{ color: "var(--text-muted)" }}
               >
                 {stat.sub}
               </span>
-            </div>
+            </motion.div>
           </AnimatedItem>
         ))}
       </AnimatedGroup>
     </section>
+  );
+}
+
+/* ─── How It Works ────────────────────────────────────────────────── */
+
+const STEPS = [
+  {
+    step: "01",
+    title: "Connect your platforms",
+    description: "Link your Stripe, Gumroad, YouTube, and newsletter in one click. No code required.",
+  },
+  {
+    step: "02",
+    title: "See your unified dashboard",
+    description: "All revenue, audience, and content analytics appear in a single glass‑morphic view.",
+  },
+  {
+    step: "03",
+    title: "Act on AI insights",
+    description: "Aura highlights your biggest opportunities and warns you about dips before they hurt.",
+  },
+];
+
+export function HowItWorks() {
+  return (
+    <section className="px-6 pb-24 md:px-12">
+      <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
+        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
+          How it works
+        </h2>
+        <p className="mt-4 text-base" style={{ color: "var(--text-secondary)" }}>
+          Get from sign‑up to actionable insights in under three minutes.
+        </p>
+      </AnimatedWrapper>
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
+        {STEPS.map((s, i) => (
+          <AnimatedItem key={s.step} variant="fadeUp" className="h-full">
+            <motion.div
+              className="flex flex-col items-start gap-4 rounded-2xl p-6 h-full"
+              style={{
+                background: "rgba(var(--glass-bg-rgb) / 0.05)",
+                backdropFilter: "blur(var(--glass-blur-sm))",
+                border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+              }}
+              whileHover={{ y: -4 }}
+            >
+              <span
+                className="font-display text-3xl font-bold"
+                style={{ color: "var(--accent-cyan)" }}
+              >
+                {s.step}
+              </span>
+              <h3 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
+                {s.title}
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-tertiary)" }}>
+                {s.description}
+              </p>
+            </motion.div>
+          </AnimatedItem>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ────────────────────────────────────────────────── */
+
+const TESTIMONIALS = [
+  {
+    quote: "Aura replaced three separate tools for me. Now I spend more time creating and less time spreadsheeting.",
+    author: "Maya K.",
+    handle: "YouTuber, 240K subscribers",
+  },
+  {
+    quote: "The AI insights are scary accurate. It told me to double down on long‑form video, and my revenue jumped 30% the next month.",
+    author: "Jordan P.",
+    handle: "Course creator & newsletter author",
+  },
+  {
+    quote: "Finally, a dashboard that doesn't look like it was built in 2005. The glassmorphism is *chef's kiss*.",
+    author: "Alex R.",
+    handle: "SaaS founder & content creator",
+  },
+];
+
+export function Testimonials() {
+  return (
+    <section className="px-6 pb-24 md:px-12">
+      <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
+        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
+          Loved by creators
+        </h2>
+        <p className="mt-4 text-base" style={{ color: "var(--text-secondary)" }}>
+          Join thousands of creators who've already upgraded their analytics.
+        </p>
+      </AnimatedWrapper>
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+        {TESTIMONIALS.map((t, i) => (
+          <AnimatedItem key={i} variant="fadeUp" className="h-full">
+            <motion.div
+              className="flex flex-col justify-between rounded-2xl p-6 h-full"
+              style={{
+                background: "rgba(var(--glass-bg-rgb) / 0.05)",
+                backdropFilter: "blur(var(--glass-blur-sm))",
+                border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+              }}
+              whileHover={{ y: -3 }}
+            >
+              <p className="text-sm leading-relaxed italic" style={{ color: "var(--text-secondary)" }}>
+                “{t.quote}”
+              </p>
+              <div className="mt-4 pt-4 border-t border-white/5">
+                <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                  {t.author}
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {t.handle}
+                </p>
+              </div>
+            </motion.div>
+          </AnimatedItem>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+const INTEGRATIONS = ["Stripe", "Gumroad", "YouTube", "Twitter", "ConvertKit", "Ghost", "Substack", "Webflow"];
+
+export function Integrations() {
+  return (
+    <section className="px-6 pb-24 md:px-12">
+      <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
+        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
+          Works with your stack
+        </h2>
+        <p className="mt-4 text-base" style={{ color: "var(--text-secondary)" }}>
+          Aura plugs into the tools you already use, no migration needed.
+        </p>
+      </AnimatedWrapper>
+      <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-4">
+        {INTEGRATIONS.map((name) => (
+          <span
+            key={name}
+            className="rounded-xl px-4 py-2 text-sm font-medium"
+            style={{
+              background: "rgba(var(--glass-bg-rgb) / 0.05)",
+              border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {name}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const FAQS = [
+  { q: "Is there a free plan?", a: "Yes, you can start with a 14‑day free trial of the Pro plan. No credit card required." },
+  { q: "How do you handle my data?", a: "Your data is stored in your own Supabase instance with row‑level security. We never see your raw data." },
+  { q: "Can I cancel anytime?", a: "Absolutely. Cancel with one click and your data remains accessible for 30 days." },
+  { q: "What platforms do you support?", a: "We currently support Stripe, Gumroad, YouTube, Twitter/X, newsletters (ConvertKit, Ghost, Substack), and manual CSV import." },
+];
+
+export function FAQ() {
+  return (
+    <section className="px-6 pb-24 md:px-12">
+      <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
+        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
+          Frequently asked questions
+        </h2>
+      </AnimatedWrapper>
+      <div className="mx-auto max-w-2xl divide-y divide-white/5">
+        {FAQS.map((faq, i) => (
+          <AnimatedItem key={i} variant="fadeUp">
+            <div className="py-5">
+              <h3 className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
+                {faq.q}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-tertiary)" }}>
+                {faq.a}
+              </p>
+            </div>
+          </AnimatedItem>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="border-t border-white/5 px-6 py-12 md:px-12">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
+        <div>
+          <h4 className="font-display font-bold text-sm mb-4" style={{ color: "var(--text-primary)" }}>Product</h4>
+          <ul className="space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
+            <li><Link href="/features">Features</Link></li>
+            <li><Link href="/pricing">Pricing</Link></li>
+            <li><Link href="/blog">Blog</Link></li>
+            <li><Link href="/login">Sign in</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-display font-bold text-sm mb-4" style={{ color: "var(--text-primary)" }}>Company</h4>
+          <ul className="space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
+            <li><Link href="/about">About</Link></li>
+            <li><Link href="/careers">Careers</Link></li>
+            <li><Link href="/press">Press</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-display font-bold text-sm mb-4" style={{ color: "var(--text-primary)" }}>Support</h4>
+          <ul className="space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
+            <li><Link href="/contact">Contact</Link></li>
+            <li><Link href="/docs">Documentation</Link></li>
+            <li><Link href="/status">System status</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-display font-bold text-sm mb-4" style={{ color: "var(--text-primary)" }}>Legal</h4>
+          <ul className="space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
+            <li><Link href="/privacy">Privacy Policy</Link></li>
+            <li><Link href="/terms">Terms of Service</Link></li>
+            <li><Link href="/cookies">Cookie Policy</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className="mt-12 text-center text-xs" style={{ color: "var(--text-muted)" }}>
+        © {new Date().getFullYear()} Aura. All rights reserved.
+      </div>
+    </footer>
   );
 }

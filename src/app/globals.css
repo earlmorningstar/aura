@@ -777,6 +777,20 @@
   to   { width: var(--progress-width, 100%); }
 }
 
+/* ─── Futuristic background orb drift ─────────────────────────── */
+/* @keyframes drift-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.08); }
+}
+@keyframes drift-2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-30px, 20px) scale(1.06); }
+}
+@keyframes drift-3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(20px, -25px) scale(1.05); }
+} */
+
 /* Convenience animation classes */
 .animate-fade-in        { animation: fade-in      var(--duration-slow)  var(--ease-out-expo) both; }
 .animate-fade-up        { animation: fade-up       var(--duration-slow)  var(--ease-out-expo) both; }

@@ -1,33 +1,3 @@
-// import type { Config } from "tailwindcss";
-
-// const config: Config = {
-//   content: [
-//     "./src/app/**/*.{js,ts,jsx,tsx}",
-//     "./src/components/**/*.{js,ts,jsx,tsx}",
-//   ],
-//   theme: {
-//     extend: {
-//       colors: {
-//         aura: {
-//           bg: "#050505",
-//           glass: "rgba(255,255,255,0.08)",
-//           border: "rgba(255,255,255,0.1)",
-//           accent: {
-//             start: "#00f5ff",
-//             end: "#a855f7",
-//           },
-//         },
-//       },
-//       backdropBlur: {
-//         xs: "2px",
-//       },
-//     },
-//   },
-//   plugins: [],
-// };
-
-// export default config;
-
 import type { Config } from "tailwindcss";
 
 /**
@@ -282,6 +252,18 @@ const config: Config = {
           from: { "--border-angle": "0deg" } as Record<string, string>,
           to: { "--border-angle": "360deg" } as Record<string, string>,
         },
+        "drift-1": {
+          "0%": { transform: "translate(0, 0) scale(1)" },
+          "100%": { transform: "translate(40px, 30px) scale(1.08)" },
+        },
+        "drift-2": {
+          "0%": { transform: "translate(0, 0) scale(1)" },
+          "100%": { transform: "translate(-30px, 20px) scale(1.06)" },
+        },
+        "drift-3": {
+          "0%": { transform: "translate(0, 0) scale(1)" },
+          "100%": { transform: "translate(20px, -25px) scale(1.05)" },
+        },
       },
 
       animation: {
@@ -297,6 +279,9 @@ const config: Config = {
         "spin-slow": "spin-slow   8s linear infinite",
         "count-up": "count-up    0.4s cubic-bezier(0.16,1,0.3,1) both",
         skeleton: "skeleton-wave 1.8s ease-in-out infinite",
+        "drift-1": "drift-1 18s ease-in-out infinite alternate",
+        "drift-2": "drift-2 22s ease-in-out infinite alternate",
+        "drift-3": "drift-3 16s ease-in-out infinite alternate",
       },
 
       /* ─── Transition timing functions ─────────────────────── */

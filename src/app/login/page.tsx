@@ -26,7 +26,9 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useSearchParams } from "next/navigation";
 import { Mail, Chrome, CheckCircle2, AlertCircle, ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { GlassButton } from "@/components/ui/glass-button";
+import { GlassButton } from "@/components/ui/glass-button"
+import { ParticleSphere } from "@/components/effects/particle-sphere";
+
 
 function getClient() {
   return createBrowserClient(
@@ -48,13 +50,13 @@ function OrDivider() {
 }
 
 function LoginPage() {
-  const searchParams  = useSearchParams();
-  const redirectTo    = searchParams.get("redirectTo") ?? "/dashboard";
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "/dashboard";
 
-  const [email, setEmail]       = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [authState, setAuthState] = React.useState<AuthState>("idle");
-  const [errorMessage, setError]  = React.useState("");
-  const [oauthLoading, setOAuth]  = React.useState(false);
+  const [errorMessage, setError] = React.useState("");
+  const [oauthLoading, setOAuth] = React.useState(false);
 
   // ── Magic link (works for sign‑up and login) ──
   async function handleMagicLink(e: React.FormEvent) {
@@ -109,17 +111,18 @@ function LoginPage() {
   return (
     <div
       className="relative flex min-h-screen flex-col items-center justify-center px-4"
-      style={{ background: "var(--color-bg-void)" }}
+      // style={{ background: "var(--color-bg-void)" }
+      style={{ background: "transparent" }}
     >
       {/* Ambient background */}
-      <div
+      {/* <div
         aria-hidden
         className="pointer-events-none fixed inset-0"
         style={{
           background:
             "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(var(--accent-cyan-rgb) / 0.06), transparent 70%)",
         }}
-      />
+      /> */}
 
       {/* Back to home */}
       <motion.div
@@ -263,6 +266,7 @@ export default function LoginPageWrapper() {
         </div>
       }
     >
+      <ParticleSphere radius={2} count={4000} color="#6366f1" speed={0.7} />
       <LoginPage />
     </Suspense>
   );
