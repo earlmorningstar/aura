@@ -633,7 +633,7 @@ const FAQS = [
 
 export function FAQ() {
   return (
-    <section className="px-6 pb-24 md:px-12">
+    <section className="px-6 pb-24 md:px-12 mt-16">
       <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
         <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
           Frequently asked questions
@@ -695,8 +695,8 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="mt-12 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-        © {new Date().getFullYear()} Aura. All rights reserved.
+      <div className="mt-12 text-center text-xs" style={{ color: "#00f5ff" }}>
+        © {new Date().getFullYear()} Aura by Earl Morningstar. All rights reserved.
       </div>
     </footer>
   );

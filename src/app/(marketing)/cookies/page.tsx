@@ -1,0 +1,34 @@
+import type { Metadata } from "next";
+import { MarketingNav } from "../marketing-client";
+
+export const metadata: Metadata = {
+    title: "Cookie Policy · Aura",
+    description: "How Aura uses cookies.",
+};
+
+export default function CookiePage() {
+    return (
+        <div className="min-h-screen bg-[#05050f] text-white">
+            <MarketingNav />
+            <div className="mx-auto max-w-3xl px-6 py-24 prose prose-invert">
+                <h1 className="font-display text-4xl font-bold mb-6">Cookie Policy</h1>
+                <p className="text-white/70"><em>Last updated: May 2026</em></p>
+                <div className="space-y-4 text-white/70 mt-6">
+                    <p>
+                        We use essential cookies for authentication and security. We do not use
+                        tracking or advertising cookies.
+                    </p>
+                    <h2 className="text-xl font-semibold text-white mt-6">What we use</h2>
+                    <ul className="list-disc list-inside">
+                        <li>Session cookies for keeping you signed in</li>
+                        <li>Preference cookies for remembering your dark mode setting</li>
+                    </ul>
+                    <p className="mt-4">
+                        You can disable cookies in your browser settings, but some features may not
+                        work properly.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
