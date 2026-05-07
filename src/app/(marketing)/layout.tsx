@@ -1,11 +1,9 @@
-// import { ParticleSphere } from "@/components/effects/particle-sphere";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
-            {/* <ParticleSphere radius={2} count={4000} color="#6366f1" speed={0.7} /> */}
             <div className="fixed inset-0 bg-[#05050f] -z-10" />
             <div className="relative z-10 pt-24 px-6 md:px-12">
                 <Link

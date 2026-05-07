@@ -31,13 +31,27 @@ export function ParticleSphere({
         // =========================
         const scene = new THREE.Scene();
 
+        const VFOV_DEG = 60;
+
         const camera = new THREE.PerspectiveCamera(
-            60,
+            VFOV_DEG,
             mount.clientWidth / mount.clientHeight,
             0.1,
             100
         );
-        camera.position.z = 5;
+
+        // Computes the z distance that guarantees the sphere fits
+        // inside the viewport on both axes, with a small padding factor.
+        const fitCameraZ = (width: number, height: number): number => {
+            const aspect = width / height;
+            const vFov = THREE.MathUtils.degToRad(VFOV_DEG);
+            const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
+            // Use whichever axis is tighter (portrait = horizontal is tighter)
+            const minFov = Math.min(vFov, hFov);
+            return (radius * 1.6) / Math.tan(minFov / 2);
+        };
+
+        camera.position.z = fitCameraZ(mount.clientWidth, mount.clientHeight);
 
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -57,7 +71,6 @@ export function ParticleSphere({
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
 
-            // Tighter shell — very small jitter so the sphere reads crisply
             const r = radius * (1 + (Math.random() - 0.5) * 0.025);
 
             const x = r * Math.sin(phi) * Math.cos(theta);
@@ -74,7 +87,7 @@ export function ParticleSphere({
         );
 
         const material = new THREE.PointsMaterial({
-            size: 0.012,           // smaller than before (was 0.035)
+            size: 0.012,
             color: color,
             transparent: true,
             opacity: 0.9,
@@ -130,12 +143,11 @@ export function ParticleSphere({
         // =========================
         const spaceCount = 3000;
         const spacePositions: number[] = [];
-        const spreadRadius = 20; // how far out into "space" they scatter
+        const spreadRadius = 20;
 
         for (let i = 0; i < spaceCount; i++) {
             let x: number, y: number, z: number;
 
-            // Keep placing until particle lands outside the globe
             do {
                 x = (Math.random() - 0.5) * spreadRadius * 2;
                 y = (Math.random() - 0.5) * spreadRadius * 2;
@@ -151,7 +163,6 @@ export function ParticleSphere({
             new THREE.Float32BufferAttribute(spacePositions, 3)
         );
 
-        // Space particles are white/very light and tiny — classic star field
         const spaceMaterial = new THREE.PointsMaterial({
             size: 0.025,
             color: "#ffffff",
@@ -172,9 +183,9 @@ export function ParticleSphere({
 
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(mount.clientWidth, mount.clientHeight),
-            1.5,   // strength  — bumped up so smaller particles still glow
-            0.6,   // radius
-            0.1    // threshold — lower = more surfaces catch the bloom
+            1.5,
+            0.6,
+            0.1
         );
 
         composer.addPass(bloomPass);
@@ -190,12 +201,10 @@ export function ParticleSphere({
 
             const t = clock.getElapsedTime();
 
-            // Globe spins
             points.rotation.y += 0.002 * speed;
             points.rotation.x = Math.sin(t * 0.3) * 0.2;
             lines.rotation.copy(points.rotation);
 
-            // Space particles drift very slowly — subtle parallax feel
             spaceParticles.rotation.y += 0.0001 * speed;
             spaceParticles.rotation.x += 0.00005 * speed;
 
@@ -210,11 +219,16 @@ export function ParticleSphere({
         const handleResize = () => {
             if (!mount) return;
 
-            camera.aspect = mount.clientWidth / mount.clientHeight;
+            const w = mount.clientWidth;
+            const h = mount.clientHeight;
+
+            camera.aspect = w / h;
+            // Recompute z so the globe stays fully visible at every size
+            camera.position.z = fitCameraZ(w, h);
             camera.updateProjectionMatrix();
 
-            renderer.setSize(mount.clientWidth, mount.clientHeight);
-            composer.setSize(mount.clientWidth, mount.clientHeight);
+            renderer.setSize(w, h);
+            composer.setSize(w, h);
         };
 
         window.addEventListener("resize", handleResize);
