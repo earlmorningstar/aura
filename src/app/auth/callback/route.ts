@@ -17,9 +17,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const code = searchParams.get("code");
-  const redirectTo = searchParams.get("redirectTo") ?? "/";
+  const requestUrl = new URL(req.url);
+  const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("redirectTo") || "/dashboard";
 
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=missing_code", req.url));
@@ -33,5 +33,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=auth_failed", req.url));
   }
 
-  return NextResponse.redirect(new URL(redirectTo, req.url));
+  // Successful auth – go to the intended page
+  return NextResponse.redirect(new URL(next, req.url));
 }

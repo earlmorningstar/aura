@@ -10,10 +10,10 @@ export default function PrivacyPage() {
     return (
         <div className="min-h-screen bg-[#05050f] text-white">
             <MarketingNav />
-            <div className="mx-auto max-w-3xl px-6 py-24 prose prose-invert">
+            <div className="mx-auto max-w-3xl px-6 py-24">
                 <h1 className="font-display text-4xl font-bold mb-6">Privacy Policy</h1>
-                <p className="text-white/70"><em>Last updated: May 2026</em></p>
-                <div className="space-y-4 text-white/70 mt-6">
+                <p className="text-white/70 text-sm mb-8">Last updated: May 2026</p>
+                <div className="space-y-4 text-white/70 leading-relaxed">
                     <p>
                         Aura ("we", "us") is committed to protecting your privacy. This policy
                         explains how we handle your data.

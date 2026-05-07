@@ -24,8 +24,8 @@ import { NextResponse, type NextRequest } from "next/server";
  * Everything else is treated as PROTECTED.
  * ──────────────────────────────────────────────────────────────── */
 const PUBLIC_ROUTES: readonly string[] = [
-  "/", 
-  "/login", 
+  "/",
+  "/login",
   "/auth/callback"
 ];
 

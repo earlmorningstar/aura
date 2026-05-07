@@ -114,16 +114,6 @@ function LoginPage() {
       // style={{ background: "var(--color-bg-void)" }
       style={{ background: "transparent" }}
     >
-      {/* Ambient background */}
-      {/* <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(var(--accent-cyan-rgb) / 0.06), transparent 70%)",
-        }}
-      /> */}
-
       {/* Back to home */}
       <motion.div
         className="absolute left-6 top-6"

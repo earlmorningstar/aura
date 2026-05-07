@@ -9,7 +9,6 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   MarketingNav,
   MarketingHero,
@@ -21,6 +20,7 @@ import {
   FAQ,
   Footer
 } from "./marketing-client";
+import { ParticleSphere } from "@/components/effects/particle-sphere";
 /* ─── Metadata ───────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
@@ -38,7 +38,9 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "transparent" }}>
+    <>
+      <ParticleSphere radius={2} count={4000} color="#6366f1" speed={0.7} />
+      {/* <div className="relative min-h-screen overflow-x-hidden" style={{ background: "transparent" }}> */}
       <div className="relative z-10">
         <MarketingNav />
         <MarketingHero />
@@ -50,6 +52,8 @@ export default function LandingPage() {
         <FAQ />
         <Footer />
       </div>
-    </div>
+      {/* </div> */}
+    </>
+
   );
 }

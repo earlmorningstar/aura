@@ -488,7 +488,11 @@ export function HowItWorks() {
   return (
     <section className="px-6 pb-24 md:px-12">
       <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
-        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
+        <h2 className="font-display font-bold text-3xl md:text-4xl leading-normal" style={{
+          fontSize: "clamp(1.75rem, 4vw, 3rem)",
+          letterSpacing: "var(--tracking-tight)",
+          color: "var(--text-primary)", lineHeight: "1.25"
+        }}>
           How it works
         </h2>
         <p className="mt-4 text-base" style={{ color: "var(--text-secondary)" }}>
@@ -552,8 +556,11 @@ export function Testimonials() {
   return (
     <section className="px-6 pb-24 md:px-12">
       <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
-        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
-          Loved by creators
+        <h2 className="font-display font-bold text-3xl md:text-4xl leading-normal" style={{
+          fontSize: "clamp(1.75rem, 4vw, 3rem)",
+          letterSpacing: "var(--tracking-tight)",
+          color: "var(--text-primary)", lineHeight: "1.25"
+        }}>Loved by creators
         </h2>
         <p className="mt-4 text-base" style={{ color: "var(--text-secondary)" }}>
           Join thousands of creators who've already upgraded their analytics.
@@ -598,9 +605,11 @@ export function Integrations() {
   return (
     <section className="px-6 pb-24 md:px-12">
       <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
-        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
-          Works with your stack
-        </h2>
+        <h2 className="font-display font-bold text-3xl md:text-4xl leading-normal" style={{
+          fontSize: "clamp(1.75rem, 4vw, 3rem)",
+          letterSpacing: "var(--tracking-tight)",
+          color: "var(--text-primary)", lineHeight: "1.25"
+        }}>Works with your stack </h2>
         <p className="mt-4 text-base" style={{ color: "var(--text-secondary)" }}>
           Aura plugs into the tools you already use, no migration needed.
         </p>
@@ -633,10 +642,13 @@ const FAQS = [
 
 export function FAQ() {
   return (
-    <section className="px-6 pb-24 md:px-12 mt-16">
+    <section className="px-6 pb-24 md:px-12">
       <AnimatedWrapper variant="fadeUp" className="mb-16 text-center">
-        <h2 className="font-display font-bold text-3xl md:text-4xl" style={{ color: "var(--text-primary)" }}>
-          Frequently asked questions
+        <h2 className="font-display font-bold text-3xl md:text-4xl leading-normal" style={{
+          fontSize: "clamp(1.75rem, 4vw, 3rem)",
+          letterSpacing: "var(--tracking-tight)",
+          color: "var(--text-primary)", lineHeight: "1.25"
+        }}>          Frequently asked questions
         </h2>
       </AnimatedWrapper>
       <div className="mx-auto max-w-2xl divide-y divide-white/5">
