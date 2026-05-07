@@ -9,7 +9,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   TrendingUp,
   Users,
@@ -26,62 +27,151 @@ import { AnimatedWrapper, AnimatedGroup, AnimatedItem } from "@/components/anima
 /* ─── MarketingNav ───────────────────────────────────────────────── */
 
 export function MarketingNav() {
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+
   return (
-    <motion.header
-      className="fixed left-0 right-0 top-0 z-[var(--z-sticky)] flex items-center justify-between px-6 py-4 md:px-12"
-      style={{
-        background: "rgba(var(--glass-bg-rgb) / 0.04)",
-        backdropFilter: "blur(var(--glass-blur-md)) saturate(160%)",
-        WebkitBackdropFilter: "blur(var(--glass-blur-md)) saturate(160%)",
-        borderBottom: "1px solid rgba(var(--glass-border-rgb) / 0.06)",
-        boxShadow: "0 4px 24px -8px rgba(0,0,0,0.3)",
-      }}
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 280, damping: 26 }}
-    >
-      {/* Logo */}
-      <Link href="/" className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60 rounded-lg">
-        <motion.div
-          className="flex h-8 w-8 items-center justify-center rounded-xl font-display text-xs font-black"
-          style={{ background: "var(--gradient-brand)", color: "var(--color-bg-void)" }}
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+    <>
+      <motion.header
+        className="fixed left-0 right-0 top-0 z-[var(--z-sticky)] flex items-center justify-between px-6 py-4 md:px-12"
+        style={{
+          background: "rgba(var(--glass-bg-rgb) / 0.04)",
+          backdropFilter: "blur(var(--glass-blur-md)) saturate(160%)",
+          WebkitBackdropFilter: "blur(var(--glass-blur-md)) saturate(160%)",
+          borderBottom: "1px solid rgba(var(--glass-border-rgb) / 0.06)",
+          boxShadow: "0 4px 24px -8px rgba(0,0,0,0.3)",
+        }}
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 280, damping: 26 }}
+      >
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60 rounded-lg"
         >
-          A
-        </motion.div>
-        <span
-          className="font-display text-xl font-bold"
-          style={{ letterSpacing: "var(--tracking-tight)", color: "var(--text-primary)" }}
-        >
-          aura
-        </span>
-      </Link>
-
-      {/* Nav links */}
-      <nav className="hidden items-center gap-6 md:flex" aria-label="Marketing navigation">
-        {["Features", "Pricing", "Blog"].map((label) => (
-          <Link
-            key={label}
-            href={`/${label.toLowerCase()}`}
-            className="text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60 rounded"
-            style={{ color: "var(--text-secondary)" }}
+          <motion.div
+            className="flex h-8 w-8 items-center justify-center rounded-xl font-display text-xs font-black"
+            style={{ background: "var(--gradient-brand)", color: "var(--color-bg-void)" }}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ type: "spring", stiffness: 500, damping: 20 }}
           >
-            {label}
-          </Link>
-        ))}
-      </nav>
+            A
+          </motion.div>
+          <span
+            className="font-display text-xl font-bold"
+            style={{ letterSpacing: "var(--tracking-tight)", color: "var(--text-primary)" }}
+          >
+            aura
+          </span>
+        </Link>
 
-      {/* CTAs */}
-      <div className="flex items-center gap-3">
-        <GlassButton variant="ghost" size="sm" asChild>
-          <Link href="/login">Sign in</Link>
-        </GlassButton>
-        <GlassButton variant="primary" size="sm" asChild>
-          <Link href="/login">Start free trial</Link>
-        </GlassButton>
-      </div>
-    </motion.header>
+        {/* Desktop nav links */}
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Marketing navigation">
+          {["Features", "Pricing", "Blog"].map((label) => (
+            <Link
+              key={label}
+              href={`/${label.toLowerCase()}`}
+              className="text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60 rounded"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Desktop CTAs */}
+        <div className="hidden md:flex items-center gap-3">
+          <GlassButton variant="ghost" size="sm" asChild>
+            <Link href="/login">Sign in</Link>
+          </GlassButton>
+          <GlassButton variant="primary" size="sm" asChild>
+            <Link href="/login">Start free trial</Link>
+          </GlassButton>
+        </div>
+
+        {/* Mobile hamburger / close icon */}
+        <button
+          className="md:hidden flex items-center justify-center h-9 w-9 rounded-xl border border-white/5 bg-white/[0.04] backdrop-blur-sm"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileOpen ? (
+            <X size={20} style={{ color: "var(--text-secondary)" }} />
+          ) : (
+            <Menu size={20} style={{ color: "var(--text-secondary)" }} />
+          )}
+        </button>
+      </motion.header>
+
+      {/* Mobile slide‑in menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop – z-[499] */}
+            <motion.div
+              className="fixed inset-0 z-[499] bg-black/60 backdrop-blur-sm md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+            />
+
+            {/* Drawer – z-[500] */}
+            <motion.div
+              className="fixed right-0 top-0 z-[500] h-full w-[65%] flex flex-col p-6 md:hidden"
+              style={{
+                background: "rgba(10,10,18,0.96)",
+                backdropFilter: "blur(24px) saturate(180%)",
+                WebkitBackdropFilter: "blur(24px) saturate(180%)",
+                borderLeft: "1px solid rgba(var(--glass-border-rgb) / 0.2)",
+                boxShadow: "var(--shadow-lg)",
+                borderRadius: "var(--radius-2xl) 0 0 var(--radius-2xl)",
+              }}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              {/* Close button */}
+              <div className="flex justify-end mb-8">
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/5"
+                  style={{ color: "var(--text-tertiary)" }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Nav links */}
+              <div className="flex flex-col gap-4 mb-8">
+                {["Features", "Pricing", "Blog"].map((label) => (
+                  <Link
+                    key={label}
+                    href={`/${label.toLowerCase()}`}
+                    onClick={() => setMobileOpen(false)}
+                    className="text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60 rounded-lg px-2 py-1"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-col gap-3 mt-auto">
+                <GlassButton variant="ghost" size="md" className="w-full" asChild>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}>Sign in</Link>
+                </GlassButton>
+                <GlassButton variant="primary" size="md" className="w-full" asChild>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}>Start free trial</Link>
+                </GlassButton>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
