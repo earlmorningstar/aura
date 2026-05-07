@@ -179,7 +179,7 @@ export function MarketingNav() {
 
 export function MarketingHero() {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pb-24 pt-32 text-center md:px-12">
+    <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pb-24 pt-15 text-center md:px-12">
       <AnimatedGroup stagger={0.08} delayChildren={0.1} className="flex flex-col items-center gap-0">
         {/* Eyebrow badge */}
         <AnimatedItem variant="scaleIn">
