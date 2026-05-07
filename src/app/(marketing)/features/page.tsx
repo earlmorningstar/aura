@@ -30,8 +30,8 @@ export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg-void)] text-white">
       <MarketingNav />
-      <div className="mx-auto max-w-4xl px-6 py-24">
-        <h1 className="font-display text-4xl font-bold mb-4">Features</h1>
+      <div className="mx-auto max-w-4xl px-6 py-10">
+        <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Features</h1>
         <p className="text-lg text-white/60 mb-12">
           Aura brings all your creator analytics into one beautiful glass dashboard.
         </p>

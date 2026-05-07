@@ -10,8 +10,8 @@ export default function DocsPage() {
     return (
         <div className="min-h-screen bg-[#05050f] text-white">
             <MarketingNav />
-            <div className="mx-auto max-w-3xl px-6 py-24">
-                <h1 className="font-display text-4xl font-bold mb-6">Documentation</h1>
+            <div className="mx-auto max-w-3xl px-6 py-10">
+                <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Documentation</h1>
                 <p className="text-white/70 mb-8">
                     Full documentation is coming soon. In the meantime, here are some quick
                     start guides:

@@ -10,8 +10,8 @@ export default function StatusPage() {
     return (
         <div className="min-h-screen bg-[#05050f] text-white">
             <MarketingNav />
-            <div className="mx-auto max-w-3xl px-6 py-24 text-center">
-                <h1 className="font-display text-4xl font-bold mb-6">System Status</h1>
+            <div className="mx-auto max-w-3xl px-6 py-10 text-center">
+                <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">System Status</h1>
                 <div className="rounded-2xl border border-green-500/20 bg-green-500/5 p-8 backdrop-blur inline-block">
                     <div className="flex items-center justify-center gap-3 mb-4">
                         <span className="relative flex h-4 w-4">

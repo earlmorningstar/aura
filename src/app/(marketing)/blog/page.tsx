@@ -16,8 +16,8 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg-void)] text-white">
       <MarketingNav />
-      <div className="mx-auto max-w-3xl px-6 py-24">
-        <h1 className="font-display text-4xl font-bold mb-4">Blog</h1>
+      <div className="mx-auto max-w-3xl px-6 py-10">
+        <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Blog</h1>
         <p className="text-lg text-white/60 mb-12">
           Stories and insights for creators building independent businesses.
         </p>

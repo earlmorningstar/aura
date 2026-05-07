@@ -11,8 +11,8 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg-void)] text-white">
       <MarketingNav />
-      <div className="mx-auto max-w-4xl px-6 py-24 text-center">
-        <h1 className="font-display text-4xl font-bold mb-4">Simple pricing</h1>
+      <div className="mx-auto max-w-4xl px-6 py-10 text-center">
+        <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Simple pricing</h1>
         <p className="text-lg text-white/60 mb-12">
           Start with a 14-day free trial, no credit card required. Cancel anytime.
         </p>

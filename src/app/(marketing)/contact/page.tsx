@@ -10,8 +10,8 @@ export default function ContactPage() {
     return (
         <div className="min-h-screen bg-[#05050f] text-white">
             <MarketingNav />
-            <div className="mx-auto max-w-3xl px-6 py-24 text-center">
-                <h1 className="font-display text-4xl font-bold mb-6">Contact us</h1>
+            <div className="mx-auto max-w-3xl px-6 py-10 text-center">
+                <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Contact us</h1>
                 <p className="text-white/70 text-lg mb-8">
                     Have a question, suggestion, or just want to say hi?
                 </p>

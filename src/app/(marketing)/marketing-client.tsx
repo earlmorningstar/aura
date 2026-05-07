@@ -165,7 +165,7 @@ export function MarketingHero() {
 
         {/* Social proof strip */}
         <AnimatedItem variant="fadeUp">
-          <p className="mt-6 text-sm" style={{ color: "var(--text-muted)" }}>
+          <p className="mt-6 text-sm" style={{ color: "var(--text-secondary)" }}>
             No credit card required · Cancel any time · 14-day free trial
           </p>
         </AnimatedItem>

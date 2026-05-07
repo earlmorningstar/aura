@@ -8,7 +8,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <div className="relative z-10 pt-24 px-6 md:px-12">
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-8"
+                    className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4"
                 >
                     <ArrowLeft size={16} />
                     Back to home

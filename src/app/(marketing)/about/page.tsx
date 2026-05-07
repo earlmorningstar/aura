@@ -10,8 +10,8 @@ export default function AboutPage() {
     return (
         <div className="min-h-screen bg-[#05050f] text-white">
             <MarketingNav />
-            <div className="mx-auto max-w-3xl px-6 py-24">
-                <h1 className="font-display text-4xl font-bold mb-6">About Aura</h1>
+            <div className="mx-auto max-w-3xl px-6 py-10">
+                <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">About Aura</h1>
                 <div className="space-y-4 text-white/70 leading-relaxed">
                     <p>
                         Aura was built by a small team of creators who were tired of jumping between
