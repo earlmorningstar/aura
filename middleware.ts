@@ -90,6 +90,21 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const isAuthed = !!user;
 
+  // Redirect to onboarding if display name is missing (and not already on onboarding)
+  if (isAuthed && pathname !== "/onboarding") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.display_name) {
+      const redirect = NextResponse.redirect(new URL("/onboarding", request.url));
+      response.cookies.getAll().forEach((c) => redirect.cookies.set(c.name, c.value));
+      return redirect;
+    }
+  }
+
   // ── Route guards ──────────────────────────────────────────────
 
   if (!isAuthed && routeType === "protected") {

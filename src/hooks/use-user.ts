@@ -5,23 +5,26 @@ import { supabase } from "@/lib/supabase/client";
 
 export function useUser() {
   const [displayName, setDisplayName] = useState("there");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    async function get() {
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const name =
-          user.user_metadata?.full_name ??
-          user.user_metadata?.name ??
-          user.email?.split("@")[0] ??
-          "there";
-        setDisplayName(name);
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", user.id)
+          .single();
+
+        setDisplayName(
+          profile?.display_name || user.email?.split("@")[0] || "there"
+        );
       }
+      setLoading(false);
     }
-    getUser();
+    get();
   }, []);
 
-  return { displayName };
+  return { displayName, loading };
 }

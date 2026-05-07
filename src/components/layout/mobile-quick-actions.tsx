@@ -22,6 +22,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { useNewWorkspaceModalStore } from "@/stores/new-workspace-modal-store";
 import { GlassButton } from "@/components/ui/glass-button";
+import { supabase } from "@/lib/supabase/client";
 
 export function MobileQuickActions() {
   const [open, setOpen] = React.useState(false);
@@ -106,23 +107,26 @@ export function MobileQuickActions() {
                 </div>
 
                 <div>
-  <p className="mb-2 text-xs font-semibold text-muted uppercase">Account</p>
-  <div className="flex items-center gap-3 rounded-xl px-2 py-2 bg-white/5 border border-white/5">
-    <div
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
-      style={{ background: "var(--gradient-brand)", color: "var(--color-bg-void)" }}
-    >
-      EC
-    </div>
-    <div>
-      <p className="text-sm font-medium text-white">Earl Cameron</p>
-      <p className="text-xs text-white/40">Pro plan</p>
-    </div>
-    <button className="ml-auto text-xs text-white/60 hover:text-white">
-      <LogOut size={14} />
-    </button>
-  </div>
-</div>
+                  <p className="mb-2 text-xs font-semibold text-muted uppercase">Account</p>
+                  <div className="flex items-center gap-3 rounded-xl px-2 py-2 bg-white/5 border border-white/5">
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                      style={{ background: "var(--gradient-brand)", color: "var(--color-bg-void)" }}
+                    >
+                      EC
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">Earl Cameron</p>
+                      <p className="text-xs text-white/40">Pro plan</p>
+                    </div>
+                    <button className="ml-auto text-xs text-white/60 hover:text-white" onClick={async () => {
+                      await supabase.auth.signOut();
+                      window.location.href = "/login";
+                    }}>
+                      <LogOut size={14} />
+                    </button>
+                  </div>
+                </div>
 
                 {/* Workspace */}
                 <div>
@@ -131,11 +135,10 @@ export function MobileQuickActions() {
                     {workspaces.map((ws) => (
                       <button
                         key={ws.slug}
-                        className={`w-full rounded-xl px-3 py-2 text-left text-sm font-medium ${
-                          ws.slug === currentWorkspace
-                            ? "bg-white/10 text-white"
-                            : "text-white/60 hover:bg-white/5"
-                        }`}
+                        className={`w-full rounded-xl px-3 py-2 text-left text-sm font-medium ${ws.slug === currentWorkspace
+                          ? "bg-white/10 text-white"
+                          : "text-white/60 hover:bg-white/5"
+                          }`}
                         onClick={() => {
                           setWorkspace(ws.slug);
                           setOpen(false);
@@ -144,18 +147,18 @@ export function MobileQuickActions() {
                         {ws.name}
                       </button>
                     ))}
-                   <GlassButton
-  variant="ghost"
-  size="sm"
-  className="w-full justify-start mt-1"
-  leadingIcon={<Plus size={14} />}
-  onClick={() => {
-    setOpen(false);
-    useNewWorkspaceModalStore.getState().open();
-  }}
->
-  New Workspace
-</GlassButton>
+                    <GlassButton
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start mt-1"
+                      leadingIcon={<Plus size={14} />}
+                      onClick={() => {
+                        setOpen(false);
+                        useNewWorkspaceModalStore.getState().open();
+                      }}
+                    >
+                      New Workspace
+                    </GlassButton>
                   </div>
                 </div>
 
