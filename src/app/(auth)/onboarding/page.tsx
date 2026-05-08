@@ -41,7 +41,11 @@ export default function OnboardingPage() {
 
         const { error: updateError } = await supabase
             .from("profiles")
-            .update({ display_name: displayName.trim(), updated_at: new Date().toISOString() })
+            .update({
+                display_name: displayName.trim(),
+                onboarding_completed: true,
+                updated_at: new Date().toISOString(),
+            })
             .eq("id", user.id);
 
         if (updateError) {

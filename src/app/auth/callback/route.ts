@@ -33,22 +33,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=auth_failed", req.url));
   }
 
-  // After exchangeCodeForSession succeeds, get the user and check profile
+  // Check if the user needs to complete onboarding
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("display_name")
+      .select("onboarding_completed")
       .eq("id", user.id)
       .single();
 
-    if (!profile?.display_name) {
-      // Send to onboarding instead of dashboard
+    if (!profile?.onboarding_completed) {
       return NextResponse.redirect(new URL("/onboarding", req.url));
     }
   }
 
-  // Successful auth – go to the intended page
+  // User is onboarded → go to the intended page
   return NextResponse.redirect(new URL(next, req.url));
 }
