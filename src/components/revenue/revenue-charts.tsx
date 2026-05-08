@@ -11,6 +11,9 @@
  *
  * Both panels: design-token colors, glassmorphic tooltips, SkeletonChart
  * loading states, empty states, AnimatedWrapper entrance.
+ *
+ * Data is derived directly from useRevenue transactions so charts always
+ * match the table — no separate fetch needed.
  */
 
 import * as React from "react";
@@ -32,11 +35,13 @@ import {
   type ValueType,
   type NameType,
 } from "recharts/types/component/DefaultTooltipContent";
+import { format, parseISO } from "date-fns";
 import { BarChart2, PieChart as PieChartIcon } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { SkeletonChart } from "@/components/ui/loading-skeleton";
-import { AnimatedWrapper, AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
-import { useRevenueData } from "@/hooks/use-revenue-data";
+import { AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
+import { useRevenue } from "@/hooks/use-revenue";
+import type { Transaction } from "@/hooks/use-revenue";
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 
@@ -52,7 +57,6 @@ interface SourcePoint {
 }
 
 /* ─── Design token colours for series ───────────────────────────── */
-// These CSS variables are defined in design-tokens.css and always present.
 
 const SOURCE_PALETTE = [
   "var(--accent-cyan)",
@@ -62,7 +66,7 @@ const SOURCE_PALETTE = [
   "var(--accent-pink)",
 ] as const;
 
-/* ─── Fallback data ──────────────────────────────────────────────── */
+/* ─── Fallback data (shown when no transactions exist yet) ───────── */
 
 const FALLBACK_DAILY: DailyPoint[] = [
   { name: "Apr 12", revenue: 820 },
@@ -76,10 +80,54 @@ const FALLBACK_DAILY: DailyPoint[] = [
 ];
 
 const FALLBACK_SOURCES: SourcePoint[] = [
-  { name: "Stripe",    value: 45, color: SOURCE_PALETTE[0] },
-  { name: "Gumroad",   value: 32, color: SOURCE_PALETTE[1] },
+  { name: "Stripe", value: 45, color: SOURCE_PALETTE[0] },
+  { name: "Gumroad", value: 32, color: SOURCE_PALETTE[1] },
   { name: "Affiliate", value: 23, color: SOURCE_PALETTE[2] },
 ];
+
+/* ─── Derivation helpers ─────────────────────────────────────────── */
+
+function deriveDailyRevenue(transactions: Transaction[]): DailyPoint[] {
+  // Seed the last 8 days with zero so empty days still appear on the axis
+  const dailyMap = new Map<string, number>();
+  const today = new Date();
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    dailyMap.set(format(d, "MMM d"), 0);
+  }
+
+  transactions.forEach((tx) => {
+    try {
+      const key = format(parseISO(tx.date), "MMM d");
+      if (dailyMap.has(key)) {
+        dailyMap.set(key, (dailyMap.get(key) ?? 0) + tx.amount);
+      }
+    } catch {
+      // skip malformed dates
+    }
+  });
+
+  return Array.from(dailyMap.entries()).map(([name, revenue]) => ({ name, revenue }));
+}
+
+function deriveSourceBreakdown(transactions: Transaction[]): SourcePoint[] {
+  const sourceTotals = new Map<string, number>();
+  let total = 0;
+
+  transactions.forEach((tx) => {
+    sourceTotals.set(tx.source, (sourceTotals.get(tx.source) ?? 0) + tx.amount);
+    total += tx.amount;
+  });
+
+  return Array.from(sourceTotals.entries())
+    .map(([name, value]) => ({
+      name,
+      value: total === 0 ? 0 : Math.round((value / total) * 100),
+      color: SOURCE_PALETTE[0], // overridden by caller with palette index
+    }))
+    .sort((a, b) => b.value - a.value);
+}
 
 /* ─── Shared: glassmorphic tooltip ───────────────────────────────── */
 
@@ -287,7 +335,6 @@ interface DailyRevChartProps {
 function DailyRevenueChart({ data }: DailyRevChartProps) {
   return (
     <GlassCard visual="default" padding="none">
-      {/* Header */}
       <div className="flex items-center justify-between p-6 pb-2">
         <div>
           <p className="tracking-caps" style={{ color: "var(--text-tertiary)" }}>
@@ -313,7 +360,6 @@ function DailyRevenueChart({ data }: DailyRevChartProps) {
         </div>
       </div>
 
-      {/* Chart */}
       {data.length === 0 ? (
         <ChartEmpty icon={BarChart2} />
       ) : (
@@ -326,7 +372,7 @@ function DailyRevenueChart({ data }: DailyRevChartProps) {
             >
               <defs>
                 <linearGradient id="bar-gradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="var(--accent-cyan)"   stopOpacity={0.9} />
+                  <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity={0.9} />
                   <stop offset="100%" stopColor="var(--accent-purple)" stopOpacity={0.7} />
                 </linearGradient>
               </defs>
@@ -338,21 +384,13 @@ function DailyRevenueChart({ data }: DailyRevChartProps) {
               <XAxis
                 dataKey="name"
                 stroke="rgba(255,255,255,0.12)"
-                tick={{
-                  fill: "rgba(255,255,255,0.35)",
-                  fontSize: 11,
-                  fontFamily: "var(--font-body)",
-                }}
+                tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11, fontFamily: "var(--font-body)" }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
                 stroke="rgba(255,255,255,0.12)"
-                tick={{
-                  fill: "rgba(255,255,255,0.35)",
-                  fontSize: 11,
-                  fontFamily: "var(--font-body)",
-                }}
+                tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11, fontFamily: "var(--font-body)" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v: number) => `$${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`}
@@ -387,7 +425,6 @@ interface SourceChartProps {
 function RevenueSourceChart({ data }: SourceChartProps) {
   return (
     <GlassCard visual="default" padding="none">
-      {/* Header */}
       <div className="flex items-center justify-between p-6 pb-2">
         <div>
           <p className="tracking-caps" style={{ color: "var(--text-tertiary)" }}>
@@ -413,17 +450,15 @@ function RevenueSourceChart({ data }: SourceChartProps) {
         </div>
       </div>
 
-      {/* Donut + legend */}
       {data.length === 0 ? (
         <ChartEmpty icon={PieChartIcon} />
       ) : (
         <div className="flex flex-col gap-4 px-6 pb-6">
-          {/* Donut */}
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <defs>
-                  {data.map((s, i) => (
+                  {data.map((_, i) => (
                     <filter key={`glow-${i}`} id={`pie-glow-${i}`} x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                       <feMerge>
@@ -461,8 +496,6 @@ function RevenueSourceChart({ data }: SourceChartProps) {
               </PieChart>
             </ResponsiveContainer>
           </div>
-
-          {/* Legend */}
           <SourceLegend sources={data} />
         </div>
       )}
@@ -473,7 +506,7 @@ function RevenueSourceChart({ data }: SourceChartProps) {
 /* ─── RevenueCharts ──────────────────────────────────────────────── */
 
 export function RevenueCharts() {
-  const { data, isLoading } = useRevenueData();
+  const { transactions, isLoading } = useRevenue();
 
   if (isLoading) {
     return (
@@ -488,13 +521,13 @@ export function RevenueCharts() {
     );
   }
 
-  // Merge real data over fallbacks
-  const dailyData: DailyPoint[] = data?.dailyRevenue ?? FALLBACK_DAILY;
-  const sourceData: SourcePoint[] = (data?.sourceBreakdown ?? FALLBACK_SOURCES).map(
-    (s, i) => ({
-      ...s,
-      color: SOURCE_PALETTE[i % SOURCE_PALETTE.length] ?? SOURCE_PALETTE[0],
-    }),
+  // When no transactions yet, fall through to fallback data so the UI
+  // never shows empty charts on first load.
+  const hasData = transactions.length > 0;
+
+  const dailyData = hasData ? deriveDailyRevenue(transactions) : FALLBACK_DAILY;
+  const sourceData = (hasData ? deriveSourceBreakdown(transactions) : FALLBACK_SOURCES).map(
+    (s, i) => ({ ...s, color: SOURCE_PALETTE[i % SOURCE_PALETTE.length] ?? SOURCE_PALETTE[0] }),
   ) as SourcePoint[];
 
   return (

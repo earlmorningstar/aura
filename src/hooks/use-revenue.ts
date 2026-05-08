@@ -20,7 +20,10 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createBrowserClient } from "@supabase/ssr";
+import { useDateRangeStore } from "@/stores/date-range-store";
+import { format } from "date-fns";
 import type { Transaction } from "@/stores/revenue-store";
+export type { Transaction } from "@/stores/revenue-store";
 
 function getSupabase() {
   return createBrowserClient(
@@ -32,17 +35,19 @@ function getSupabase() {
 type NewTransaction = Omit<Transaction, "id">;
 
 export function useRevenue() {
+  const { startDate, endDate } = useDateRangeStore();
   const queryClient = useQueryClient();
 
   const { data: transactions = [], isLoading, isError, refetch } = useQuery<Transaction[]>({
-    queryKey: ["transactions"],
+    queryKey: ["transactions", startDate.toISOString(), endDate.toISOString()],
     queryFn: async () => {
       const supabase = getSupabase();
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
+        .gte("date", format(startDate, "yyyy-MM-dd"))
+        .lte("date", format(endDate, "yyyy-MM-dd"))
         .order("date", { ascending: false });
-
       if (error) throw new Error(error.message);
       return (data as Transaction[]) ?? [];
     },

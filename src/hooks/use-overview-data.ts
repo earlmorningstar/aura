@@ -1,22 +1,17 @@
 "use client";
 
 /**
- * useOverviewData — fetches and shapes dashboard overview data.
- *
- * Now reads the global date-range store so that any change to the
- * topbar date picker automatically:
- * - includes the date range in the TanStack Query key
- * - triggers a fresh fetch with the new start/end dates
- * - keeps previous data visible while re‑fetching (placeholderData)
+ * useOverviewData — derives real dashboard overview data
+ * from actual revenue transactions + selected date range.
  */
 
-"use client";
-
 import { useQuery } from "@tanstack/react-query";
-import { useDateRangeStore } from "@/stores/date-range-store";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 
-export interface KPIConfig {
+import { useDateRangeStore } from "@/stores/date-range-store";
+import { useRevenue } from "@/hooks/use-revenue";
+
+interface KPI {
   title: string;
   value: string;
   rawValue: number;
@@ -30,7 +25,7 @@ export interface KPIConfig {
 }
 
 export interface OverviewData {
-  kpis: KPIConfig[];
+  kpis: KPI[];
   revenueTrend: { date: string; value: number }[];
   totalRevenue: number;
   trendDelta: string;
@@ -39,114 +34,238 @@ export interface OverviewData {
   updatedAt?: string;
 }
 
-function generateOverviewData(days: number): OverviewData {
-  const mult = days / 30;
-  const revenueBase = 14892 * mult;
-  const mrrBase = 3240 * mult;
-  const audienceBase = 1284 * mult;
-  const engagementBase = 4.8;
-  const topContentBase = 2840 * mult;
-  const productivityBase = 92;
+/**
+ * Adjust this type to match your real transaction model
+ * if your structure differs.
+ */
+interface Transaction {
+  id?: string;
+  amount: number;
+  date: string;
+  source?: string;
+}
 
-  const trendPoints = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (11 - i) * Math.ceil(days / 12));
-    return {
-      date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      value: Math.round(revenueBase * (0.5 + Math.random() * 0.5)),
-    };
+function deriveOverviewData(
+  transactions: Transaction[],
+  days: number
+): OverviewData {
+  const safeTransactions = transactions ?? [];
+
+  // =========================
+  // TOTAL REVENUE
+  // =========================
+  const totalRevenue = safeTransactions.reduce(
+    (sum, tx) => sum + Number(tx.amount || 0),
+    0
+  );
+
+  // =========================
+  // MRR (rough estimate)
+  // =========================
+  const mrr =
+    safeTransactions.length > 0
+      ? (totalRevenue / safeTransactions.length) * 30
+      : 0;
+
+  // =========================
+  // TOP CONTENT REVENUE
+  // =========================
+  const topContentRevenue =
+    safeTransactions.length > 0
+      ? Math.max(...safeTransactions.map((tx) => Number(tx.amount || 0)))
+      : 0;
+
+  // =========================
+  // REVENUE TREND
+  // =========================
+  const trendMap = new Map<string, number>();
+
+  safeTransactions.forEach((tx) => {
+    if (!tx.date) return;
+
+    const key = format(new Date(tx.date), "MMM dd");
+
+    trendMap.set(
+      key,
+      (trendMap.get(key) ?? 0) + Number(tx.amount || 0)
+    );
   });
 
+  const revenueTrend = Array.from(trendMap.entries())
+    .sort(([a], [b]) => {
+      const aDate = new Date(a).getTime();
+      const bDate = new Date(b).getTime();
+      return aDate - bDate;
+    })
+    .map(([date, value]) => ({
+      date,
+      value,
+    }));
+
+  // =========================
+  // BASIC TREND ESTIMATION
+  // =========================
+  const midpoint = Math.floor(revenueTrend.length / 2);
+
+  const firstHalf = revenueTrend
+    .slice(0, midpoint)
+    .reduce((sum, item) => sum + item.value, 0);
+
+  const secondHalf = revenueTrend
+    .slice(midpoint)
+    .reduce((sum, item) => sum + item.value, 0);
+
+  let trendDelta = "+0%";
+  let trendDirection: "up" | "down" | "neutral" = "neutral";
+
+  if (firstHalf > 0) {
+    const delta = ((secondHalf - firstHalf) / firstHalf) * 100;
+    trendDelta = `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`;
+
+    if (delta > 0) {
+      trendDirection = "up";
+    } else if (delta < 0) {
+      trendDirection = "down";
+    }
+  }
+
+  // =========================
+  // KPI CONFIG
+  // =========================
+  const kpis: KPI[] = [
+    {
+      title: "Total Revenue",
+      value: `$${totalRevenue.toLocaleString(undefined, {
+        maximumFractionDigits: 0,
+      })}`,
+      rawValue: totalRevenue,
+      prefix: "$",
+      change: trendDelta,
+      trend: trendDirection,
+      period: `${days} day${days !== 1 ? "s" : ""}`,
+      accent: "cyan",
+      icon: null,
+    },
+
+    {
+      title: "MRR",
+      value: `$${mrr.toLocaleString(undefined, {
+        maximumFractionDigits: 0,
+      })}`,
+      rawValue: mrr,
+      prefix: "$",
+      change: "+—",
+      trend: "up",
+      period: "estimated",
+      accent: "default",
+      icon: null,
+    },
+
+    {
+      title: "Transactions",
+      value: safeTransactions.length.toLocaleString(),
+      rawValue: safeTransactions.length,
+      change: "+—",
+      trend: "neutral",
+      period: "processed",
+      accent: "default",
+      icon: null,
+    },
+
+    {
+      title: "Top Content Rev.",
+      value: `$${topContentRevenue.toLocaleString(undefined, {
+        maximumFractionDigits: 0,
+      })}`,
+      rawValue: topContentRevenue,
+      prefix: "$",
+      change: "+—",
+      trend: "up",
+      period: "highest single revenue",
+      accent: "purple",
+      icon: null,
+    },
+  ];
+
+  // =========================
+  // SIMPLE AI SUMMARY
+  // =========================
+  let aiSummary =
+    "Revenue activity is stable across the selected period.";
+
+  if (trendDirection === "up") {
+    aiSummary =
+      "Revenue is trending upward. Recent transactions are outperforming earlier activity.";
+  }
+
+  if (trendDirection === "down") {
+    aiSummary =
+      "Revenue slowed during the latter half of the selected period.";
+  }
+
+  // =========================
+  // ACTIONS
+  // =========================
+  const actions: string[] = [];
+
+  if (trendDirection === "up") {
+    actions.push("Double down on your highest-performing content");
+    actions.push("Increase distribution on top channels");
+  } else if (trendDirection === "down") {
+    actions.push("Review recent audience engagement drops");
+    actions.push("Experiment with new content formats");
+  } else {
+    actions.push("Maintain current publishing consistency");
+  }
+
   return {
-    kpis: [
-      {
-        title: "Total Revenue",
-        value: `$${revenueBase.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-        rawValue: revenueBase,
-        prefix: "$",
-        change: `+${Math.round(18.4 * mult)}%`,
-        trend: "up",
-        period: `vs last period`,
-        accent: "cyan",
-        icon: null,
-      },
-      {
-        title: "MRR",
-        value: `$${mrrBase.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-        rawValue: mrrBase,
-        prefix: "$",
-        change: `+${Math.round(4.2 * mult)}%`,
-        trend: "up",
-        period: "vs last month",
-        accent: "default",
-        icon: null,
-      },
-      {
-        title: "Audience Growth",
-        value: `+${Math.round(audienceBase).toLocaleString()}`,
-        rawValue: Math.round(audienceBase),
-        prefix: "+",
-        change: `+${Math.round(12 * mult)}%`,
-        trend: "up",
-        period: "new followers",
-        accent: "default",
-        icon: null,
-      },
-      {
-        title: "Avg. Engagement",
-        value: `${(engagementBase * mult).toFixed(1)}%`,
-        rawValue: parseFloat((engagementBase * mult).toFixed(1)),
-        suffix: "%",
-        change: `−${(2.1 * mult).toFixed(1)}%`,
-        trend: "down",
-        period: "vs last month",
-        accent: "default",
-        icon: null,
-      },
-      {
-        title: "Top Content Rev.",
-        value: `$${Math.round(topContentBase).toLocaleString()}`,
-        rawValue: Math.round(topContentBase),
-        prefix: "$",
-        change: `+${Math.round(31 * mult)}%`,
-        trend: "up",
-        period: "best piece",
-        accent: "purple",
-        icon: null,
-      },
-      {
-        title: "Productivity",
-        value: `${Math.round(productivityBase * mult)}`,
-        rawValue: Math.round(productivityBase * mult),
-        suffix: "/100",
-        change: `+${Math.round(7 * mult)}`,
-        trend: "up",
-        period: "score",
-        accent: "default",
-        icon: null,
-      },
-    ],
-    revenueTrend: trendPoints,
-    totalRevenue: Math.round(revenueBase),
-    trendDelta: `+${Math.round(18.4 * mult)}%`,
-    aiSummary: "Your top-performing content continues to drive growth. Double down on video.",
-    actions: ["Double down on video", "Create follow-up post"],
+    kpis,
+    revenueTrend,
+    totalRevenue,
+    trendDelta,
+    aiSummary,
+    actions,
+    updatedAt: new Date().toISOString(),
   };
 }
 
 export function useOverviewData() {
   const { startDate, endDate } = useDateRangeStore();
-  const days = differenceInDays(endDate, startDate);
+  const { transactions = [] } = useRevenue();
+  const days = Math.max(
+    differenceInDays(endDate, startDate),
+    1
+  );
 
   return useQuery<OverviewData>({
-    queryKey: ["overview", startDate.toISOString(), endDate.toISOString()],
-    queryFn: () => {
-      // In production you'd fetch from Supabase using start/end dates.
-      // For now, generate dynamic data based on range.
-      return generateOverviewData(days);
+    queryKey: [
+      "overview",
+      startDate.toISOString(),
+      endDate.toISOString(),
+      transactions.length,
+    ],
+
+    queryFn: async () => {
+      /**
+       * Filter transactions inside selected date range
+       */
+      const filteredTransactions = transactions.filter((tx: Transaction) => {
+        if (!tx.date) return false;
+        const txDate = new Date(tx.date);
+        return txDate >= startDate && txDate <= endDate;
+      });
+      return deriveOverviewData(filteredTransactions, days);
     },
-    initialData: () => generateOverviewData(days),
-    staleTime: 5 * 60 * 1000,
-    placeholderData: (prev) => prev,
+
+    initialData: () => {
+      const filteredTransactions = transactions.filter((tx: Transaction) => {
+        if (!tx.date) return false;
+        const txDate = new Date(tx.date);
+        return txDate >= startDate && txDate <= endDate;
+      });
+      return deriveOverviewData(filteredTransactions, days);
+    },
+    staleTime: 30 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 }

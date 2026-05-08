@@ -23,6 +23,7 @@ import { useRevenue } from "@/hooks/use-revenue";
 import { downloadCSV } from "@/lib/export";
 import dynamic from "next/dynamic";
 import { SkeletonChart } from "@/components/ui/loading-skeleton";
+import { useCallback } from "react";
 
 const RevenueCharts = dynamic(
   () => import("./revenue-charts").then(mod => mod.RevenueCharts),
@@ -94,7 +95,7 @@ export function RevenuePage() {
   const { transactions, isLoading: txLoading } = useRevenue();
   const [isExporting, setIsExporting] = React.useState(false);
 
-  const handleExport = React.useCallback(async () => {
+  const handleExport = useCallback(async () => {
     setIsExporting(true);
     try {
       const filename = `revenue-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -165,8 +166,8 @@ export function RevenuePage() {
 
             {/* Add transaction form — spans 1/3 */}
             <div className="h-fit">
-    <TransactionForm />
-  </div>
+              <TransactionForm />
+            </div>
           </div>
         </AnimatedItem>
       </AnimatedGroup>

@@ -22,6 +22,7 @@ import {
   UserPlus,
   TrendingUp,
   Eye,
+  Plus,
 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GlassKPI } from "@/components/ui/glass-kpi";
@@ -35,6 +36,9 @@ import dynamic from "next/dynamic";
 import { SkeletonChart } from "@/components/ui/loading-skeleton";
 import { useAudienceData } from "@/hooks/use-audience-data";
 import type { AudienceRecord } from "@/hooks/use-audience-data";
+import { GlassButton } from "../ui/glass-button";
+import { useState } from "react";
+import { AddAudienceModal } from "./add-audience-modal";
 
 const AudienceGrowthChart = dynamic(
   () => import("./audience-growth-chart").then(mod => mod.AudienceGrowthChart),
@@ -283,6 +287,7 @@ function deriveFromRecords(records: AudienceRecord[]) {
 
 export function AudiencePage() {
   const { data: records, isLoading } = useAudienceData();
+  const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const ui = deriveFromRecords(records ?? []);
 
   return (
@@ -335,6 +340,10 @@ export function AudiencePage() {
             ))}
           </div>
         </AnimatedItem>
+
+        <GlassButton variant="outline" size="sm" leadingIcon={<Plus size={14} />} onClick={() => setAudienceModalOpen(true)}>
+          Add Data
+        </GlassButton>
 
         {/* ── Section 3: Growth chart ──────────────────────────── */}
         <AnimatedItem variant="fadeUp">
@@ -406,6 +415,7 @@ export function AudiencePage() {
         </AnimatedItem>
 
       </AnimatedGroup>
+      <AddAudienceModal open={audienceModalOpen} onClose={() => setAudienceModalOpen(false)} />
     </AnimatedPage>
   );
 }

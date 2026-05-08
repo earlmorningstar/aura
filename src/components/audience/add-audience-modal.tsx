@@ -1,0 +1,121 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, CheckCircle2 } from "lucide-react";
+import { GlassButton } from "@/components/ui/glass-button";
+import { supabase } from "@/lib/supabase/client";
+
+interface Props {
+    open: boolean;
+    onClose: () => void;
+}
+
+export function AddAudienceModal({ open, onClose }: Props) {
+    const [form, setForm] = useState({
+        platform: "YouTube",
+        followers: "",
+        new_followers: "",
+        engagement_rate: "",
+        avg_views: "",
+        recorded_date: new Date().toISOString().slice(0, 10),
+    });
+    const [submitting, setSubmitting] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!form.platform || !form.followers) return;
+        setSubmitting(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { error } = await supabase.from("audience_data").insert({
+            user_id: user.id,
+            workspace_id: "personal",
+            platform: form.platform,
+            followers: parseInt(form.followers),
+            new_followers: parseInt(form.new_followers || "0"),
+            engagement_rate: parseFloat(form.engagement_rate || "0"),
+            avg_views: parseInt(form.avg_views || "0"),
+            recorded_date: form.recorded_date,
+        });
+
+        if (error) {
+            console.error(error);
+            setSubmitting(false);
+            return;
+        }
+
+        setSuccess(true);
+        setTimeout(() => {
+            onClose();
+            setSuccess(false);
+            setForm({ ...form, followers: "", new_followers: "", engagement_rate: "", avg_views: "" });
+        }, 1500);
+    };
+
+    return (
+        <AnimatePresence>
+            {open && (
+                <motion.div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                    <motion.div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+                    <motion.div
+                        className="relative w-full max-w-md rounded-2xl p-6"
+                        style={{ background: "rgba(10,10,18,0.92)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.1)" }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                    >
+                        {success ? (
+                            <div className="flex flex-col items-center gap-3 py-6">
+                                <CheckCircle2 size={32} style={{ color: "var(--status-success)" }} />
+                                <p className="text-white font-medium">Data added!</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-lg font-semibold text-white">Add Audience Data</h2>
+                                    <button onClick={onClose} className="text-white/50 hover:text-white"><X size={18} /></button>
+                                </div>
+                                <div className="flex flex-col gap-4">
+                                    <label className="flex flex-col gap-1">
+                                        <span className="text-xs text-white/50 uppercase">Platform</span>
+                                        <select className="input" value={form.platform} onChange={e => setForm({ ...form, platform: e.target.value })}>
+                                            <option>YouTube</option>
+                                            <option>Twitter/X</option>
+                                            <option>Newsletter</option>
+                                            <option>Blog</option>
+                                        </select>
+                                    </label>
+                                    <label className="flex flex-col gap-1">
+                                        <span className="text-xs text-white/50 uppercase">Followers</span>
+                                        <input type="number" className="input" value={form.followers} onChange={e => setForm({ ...form, followers: e.target.value })} />
+                                    </label>
+                                    <label className="flex flex-col gap-1">
+                                        <span className="text-xs text-white/50 uppercase">New Followers</span>
+                                        <input type="number" className="input" value={form.new_followers} onChange={e => setForm({ ...form, new_followers: e.target.value })} />
+                                    </label>
+                                    <label className="flex flex-col gap-1">
+                                        <span className="text-xs text-white/50 uppercase">Engagement Rate (%)</span>
+                                        <input type="number" step="0.1" className="input" value={form.engagement_rate} onChange={e => setForm({ ...form, engagement_rate: e.target.value })} />
+                                    </label>
+                                    <label className="flex flex-col gap-1">
+                                        <span className="text-xs text-white/50 uppercase">Avg Views</span>
+                                        <input type="number" className="input" value={form.avg_views} onChange={e => setForm({ ...form, avg_views: e.target.value })} />
+                                    </label>
+                                    <label className="flex flex-col gap-1">
+                                        <span className="text-xs text-white/50 uppercase">Date</span>
+                                        <input type="date" className="input" value={form.recorded_date} onChange={e => setForm({ ...form, recorded_date: e.target.value })} />
+                                    </label>
+                                </div>
+                                <div className="mt-6">
+                                    <GlassButton variant="primary" size="md" className="w-full" loading={submitting} onClick={handleSubmit}>Add Data</GlassButton>
+                                </div>
+                            </>
+                        )}
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+}
