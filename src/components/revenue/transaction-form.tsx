@@ -17,7 +17,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ChevronDown, CheckCircle2, AlertCircle } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GlassButton } from "@/components/ui/glass-button";
-import { useRevenueStore } from "@/stores/revenue-store";
+// import { useRevenueStore } from "@/stores/revenue-store";
+import { useRevenue } from "@/hooks/use-revenue";
 import { cn } from "@/lib/utils";
 
 /* ─── Types ──────────────────────────────────────────────────────── */
@@ -238,7 +239,7 @@ function SuccessOverlay({ onDone }: SuccessOverlayProps) {
 /* ─── TransactionForm ────────────────────────────────────────────── */
 
 export function TransactionForm() {
-  const addTransaction = useRevenueStore((s) => s.addTransaction);
+  const { addTransaction } = useRevenue();
 
   const [form, setForm] = React.useState<FormState>({
     amount:      "",

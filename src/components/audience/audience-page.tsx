@@ -34,6 +34,7 @@ import {
 import dynamic from "next/dynamic";
 import { SkeletonChart } from "@/components/ui/loading-skeleton";
 import { useAudienceData } from "@/hooks/use-audience-data";
+import type { AudienceRecord } from "@/hooks/use-audience-data";
 
 const AudienceGrowthChart = dynamic(
   () => import("./audience-growth-chart").then(mod => mod.AudienceGrowthChart),
@@ -96,7 +97,6 @@ function PlatformCard({
             </p>
           </div>
 
-          {/* Delta badge — prevents wrapping and stays tiny */}
           <span
             className="whitespace-nowrap rounded-full px-2 py-0.5 text-[8px] font-semibold"
             style={{
@@ -109,7 +109,7 @@ function PlatformCard({
           </span>
         </div>
 
-        {/* ── Follower count — slightly smaller to keep height consistent ── */}
+        {/* ── Follower count ────────────────────────────────── */}
         <div>
           <p className="tracking-caps" style={{ color: "var(--text-muted)" }}>
             Followers
@@ -154,7 +154,7 @@ function PlatformCard({
   );
 }
 
-/* ─── Top content by audience row ────────────────────────────────── */
+/* ─── Top content row ─────────────────────────────────────────────── */
 
 interface TopContentRowProps {
   title: string;
@@ -173,7 +173,6 @@ function TopContentRow({ title, platform, views, newFollowers, index }: TopConte
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: "spring", stiffness: 320, damping: 28, delay: 0.4 + index * 0.06 }}
     >
-      {/* Rank */}
       <span
         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
         style={{
@@ -184,12 +183,8 @@ function TopContentRow({ title, platform, views, newFollowers, index }: TopConte
         {index + 1}
       </span>
 
-      {/* Title */}
       <div className="flex-1 overflow-hidden">
-        <p
-          className="truncate text-sm font-medium"
-          style={{ color: "var(--text-primary)" }}
-        >
+        <p className="truncate text-sm font-medium" style={{ color: "var(--text-primary)" }}>
           {title}
         </p>
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -197,7 +192,6 @@ function TopContentRow({ title, platform, views, newFollowers, index }: TopConte
         </p>
       </div>
 
-      {/* Stats */}
       <div className="flex items-center gap-6 shrink-0">
         <div className="hidden text-right sm:block">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>Views</p>
@@ -205,10 +199,7 @@ function TopContentRow({ title, platform, views, newFollowers, index }: TopConte
         </div>
         <div className="text-right">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>New followers</p>
-          <p
-            className="text-sm font-semibold"
-            style={{ color: "var(--status-success)" }}
-          >
+          <p className="text-sm font-semibold" style={{ color: "var(--status-success)" }}>
             {newFollowers}
           </p>
         </div>
@@ -217,18 +208,87 @@ function TopContentRow({ title, platform, views, newFollowers, index }: TopConte
   );
 }
 
+/* ─── Derive UI shape from audience records ────────────────────── */
+
+function deriveFromRecords(records: AudienceRecord[]) {
+  if (records.length === 0) {
+    return {
+      totalFollowers: 15660,
+      newThisMonth: 1284,
+      avgEngagement: 4.8,
+      avgViews: 22400,
+      platforms: [
+        { name: "YouTube", followers: 8420, delta: "+320 this month", engagementRate: "5.2%", avgViews: "28.4K" },
+        { name: "Twitter / X", followers: 4280, delta: "+88 this month", engagementRate: "3.7%", avgViews: "12.1K" },
+        { name: "Newsletter", followers: 2960, delta: "+142 this month", engagementRate: "42.1%", avgViews: "2.96K" },
+      ],
+      topContent: [
+        { title: "No-code tools for solopreneurs in 2026", platform: "YouTube", views: "48.2K", newFollowers: "+384" },
+        { title: "How I made $10K from a single email sequence", platform: "Newsletter", views: "12.4K", newFollowers: "+142" },
+        { title: "Thread: 10 lessons from my first year building", platform: "X", views: "28.7K", newFollowers: "+267" },
+        { title: "Full stack in 2026 — what actually matters", platform: "YouTube", views: "33.1K", newFollowers: "+198" },
+      ],
+      growthData: [
+        { date: "Apr 1", followers: 11200, newFollowers: 180 },
+        { date: "Apr 5", followers: 11800, newFollowers: 210 },
+        { date: "Apr 9", followers: 12400, newFollowers: 240 },
+        { date: "Apr 13", followers: 12800, newFollowers: 195 },
+        { date: "Apr 17", followers: 13400, newFollowers: 285 },
+        { date: "Apr 21", followers: 14100, newFollowers: 310 },
+        { date: "Apr 25", followers: 14800, newFollowers: 265 },
+        { date: "Apr 29", followers: 15600, newFollowers: 350 },
+      ],
+    };
+  }
+
+  const totalFollowers = records.reduce((sum, r) => sum + r.followers, 0);
+  const newThisMonth = records.reduce((sum, r) => sum + r.new_followers, 0);
+  const avgEngagement = records.length
+    ? Math.round((records.reduce((sum, r) => sum + (r.engagement_rate ?? 0), 0) / records.length) * 10) / 10
+    : 0;
+  const avgViews = records.length
+    ? Math.round(records.reduce((sum, r) => sum + (r.avg_views ?? 0), 0) / records.length)
+    : 0;
+
+  const byPlatform: Record<string, { followers: number; new_followers: number }> = {};
+  for (const r of records) {
+    if (!byPlatform[r.platform]) {
+      byPlatform[r.platform] = { followers: 0, new_followers: 0 };
+    }
+    const entry = byPlatform[r.platform]!;
+    entry.followers += r.followers;
+    entry.new_followers += r.new_followers;
+  }
+
+  const platforms = Object.entries(byPlatform).map(([name, d]) => ({
+    name,
+    followers: d.followers,
+    delta: `+${d.new_followers} this month`,
+    engagementRate: "—",
+    avgViews: "—",
+  }));
+
+  return {
+    totalFollowers,
+    newThisMonth,
+    avgEngagement,
+    avgViews,
+    platforms,
+    topContent: [],
+    growthData: [],
+  };
+}
+
 /* ─── AudiencePage ───────────────────────────────────────────────── */
 
 export function AudiencePage() {
-  const { data } = useAudienceData();
+  const { data: records, isLoading } = useAudienceData();
+  const ui = deriveFromRecords(records ?? []);
 
   return (
     <AnimatedPage>
-      <AnimatedGroup
-        stagger={0.1}
-        delayChildren={0.05}
-        className="flex flex-col gap-6"
-      >
+      <AnimatedGroup stagger={0.1} delayChildren={0.05} className="flex flex-col gap-6">
+
         {/* ── Section 1: Header ───────────────────────────────── */}
         <AnimatedItem variant="fadeUp">
           <div>
@@ -252,10 +312,10 @@ export function AudiencePage() {
         <AnimatedItem variant="fadeUp">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {[
-              { title: "Total Followers", rawValue: data.totalFollowers, prefix: "", suffix: "", change: "+8.4%", trend: "up" as const, period: "this month", icon: <Users size={15} />, accent: "cyan" as const },
-              { title: "New This Month", rawValue: data.newThisMonth, prefix: "+", suffix: "", change: "+12%", trend: "up" as const, period: "followers", icon: <UserPlus size={15} />, accent: "default" as const },
-              { title: "Avg. Engagement", rawValue: data.avgEngagement, prefix: "", suffix: "%", change: "−0.3%", trend: "down" as const, period: "rate", icon: <TrendingUp size={15} />, accent: "default" as const },
-              { title: "Avg. Views / Post", rawValue: data.avgViews, prefix: "", suffix: "", change: "+15.2%", trend: "up" as const, period: "across platforms", icon: <Eye size={15} />, accent: "default" as const },
+              { title: "Total Followers", rawValue: ui.totalFollowers, prefix: "", suffix: "", change: "+8.4%", trend: "up" as const, period: "this month", icon: <Users size={15} />, accent: "cyan" as const },
+              { title: "New This Month", rawValue: ui.newThisMonth, prefix: "+", suffix: "", change: "+12%", trend: "up" as const, period: "followers", icon: <UserPlus size={15} />, accent: "default" as const },
+              { title: "Avg. Engagement", rawValue: ui.avgEngagement, prefix: "", suffix: "%", change: "−0.3%", trend: "down" as const, period: "rate", icon: <TrendingUp size={15} />, accent: "default" as const },
+              { title: "Avg. Views / Post", rawValue: ui.avgViews, prefix: "", suffix: "", change: "+15.2%", trend: "up" as const, period: "across platforms", icon: <Eye size={15} />, accent: "default" as const },
             ].map((kpi, i) => (
               <GlassKPI
                 key={kpi.title}
@@ -279,13 +339,13 @@ export function AudiencePage() {
         {/* ── Section 3: Growth chart ──────────────────────────── */}
         <AnimatedItem variant="fadeUp">
           <AudienceGrowthChart
-            data={data.growthData}
-            platforms={data.platforms.map(p => ({
+            data={ui.growthData}
+            platforms={ui.platforms.map((p, i) => ({
               name: p.name,
               count: p.followers,
               delta: p.delta,
               trend: "up" as const,
-              color: p.name === "YouTube" ? "var(--accent-cyan)" : p.name === "Twitter / X" ? "var(--accent-purple)" : "var(--status-success)",
+              color: i === 0 ? "var(--accent-cyan)" : i === 1 ? "var(--accent-purple)" : "var(--status-success)",
             }))}
           />
         </AnimatedItem>
@@ -295,16 +355,12 @@ export function AudiencePage() {
           <div>
             <h2
               className="mb-4 font-display font-semibold"
-              style={{
-                fontSize: "var(--text-lg)",
-                letterSpacing: "var(--tracking-snug)",
-                color: "var(--text-primary)",
-              }}
+              style={{ fontSize: "var(--text-lg)", letterSpacing: "var(--tracking-snug)", color: "var(--text-primary)" }}
             >
               By Platform
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {data.platforms.map((p, i) => (
+              {ui.platforms.map((p, i) => (
                 <PlatformCard
                   key={p.name}
                   icon={i === 0 ? Youtube : i === 1 ? Twitter : Mail}
@@ -328,11 +384,7 @@ export function AudiencePage() {
           <GlassCard visual="default" padding="md">
             <h2
               className="mb-1 font-display font-semibold"
-              style={{
-                fontSize: "var(--text-lg)",
-                letterSpacing: "var(--tracking-snug)",
-                color: "var(--text-primary)",
-              }}
+              style={{ fontSize: "var(--text-lg)", letterSpacing: "var(--tracking-snug)", color: "var(--text-primary)" }}
             >
               Top Audience-Driving Content
             </h2>
@@ -340,12 +392,19 @@ export function AudiencePage() {
               Content pieces that brought the most new followers
             </p>
             <div>
-              {data.topContent.map((item, i) => (
-                <TopContentRow key={item.title} {...item} index={i} />
-              ))}
+              {ui.topContent.length > 0 ? (
+                ui.topContent.map((item, i) => (
+                  <TopContentRow key={item.title} {...item} index={i} />
+                ))
+              ) : (
+                <p className="py-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+                  No data yet. Add your first audience records.
+                </p>
+              )}
             </div>
           </GlassCard>
         </AnimatedItem>
+
       </AnimatedGroup>
     </AnimatedPage>
   );

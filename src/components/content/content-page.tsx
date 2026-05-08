@@ -38,7 +38,8 @@ import { GlassButton } from "@/components/ui/glass-button";
 import { GlassKPI } from "@/components/ui/glass-kpi";
 import { AnimatedPage, AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { cn } from "@/lib/utils";
-import { useContentData } from "@/hooks/use-content-data";
+// import { useContentData } from "@/hooks/use-content-data";
+import { useContentPieces } from "@/hooks/use-content-pieces";
 
 /* ─── Minimal “Add Content” Modal ────────────────────────────────── */
 
@@ -544,38 +545,28 @@ function PublishingHeatmap() {
 /* ─── ContentPage ────────────────────────────────────────────────── */
 
 export function ContentPage() {
-  const { data } = useContentData();
-  const [pieces, setPieces] = React.useState<ContentPiece[]>(data.pieces);
+  const { pieces, isLoading, addPiece } = useContentPieces();
   const [sort, setSort] = React.useState<SortOption>("revenue");
   const [platform, setPlatform] = React.useState<PlatformFilter>("all");
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
-
-  // Modal + toast state
   const [modalOpen, setModalOpen] = React.useState(false);
   const [showToast, setShowToast] = React.useState(false);
-
-  const handleAddPiece = (newPiece: ContentPiece) => {
-    setPieces((prev) => [newPiece, ...prev]);
-    setShowToast(true);
-  };
 
   const displayedPieces = React.useMemo(() => {
     let filtered = pieces;
 
-    // Platform filter
     if (platform !== "all") {
       filtered = filtered.filter((p) => p.platform === platform);
     }
 
-    // Sort
     const sorted = [...filtered].sort((a, b) => {
       switch (sort) {
         case "revenue":
-          return b.revenue - a.revenue;
+          return (b.revenue || 0) - (a.revenue || 0);
         case "engagement":
-          return parseFloat(b.engagementRate) - parseFloat(a.engagementRate);
+          return parseFloat(b.engagementRate || "0") - parseFloat(a.engagementRate || "0");
         case "views":
-          return b.views - a.views;
+          return (b.views || 0) - (a.views || 0);
         case "recent":
           return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
         default:
@@ -585,6 +576,23 @@ export function ContentPage() {
 
     return sorted;
   }, [pieces, platform, sort]);
+
+  const handleAddPiece = (newPiece: ContentPiece) => {
+    addPiece({
+      title: newPiece.title,
+      platform: newPiece.platform,
+      publishedAt: newPiece.publishedAt,
+      contentType: "video",
+      engagementRate: null,
+      engagementDelta: null,
+      revenue: 0,
+      revenueDelta: null,
+      views: 0,
+      likes: 0,
+      trend: "neutral",
+    });
+    setShowToast(true);
+  };
 
   return (
     <AnimatedPage>
@@ -618,71 +626,66 @@ export function ContentPage() {
           </div>
         </AnimatedItem>
 
-        {/* ── Section 2: KPI strip ─────────────────────────────── */}
+        {/* ── Section 2: KPI strip (placeholder, will compute later) ── */}
         <AnimatedItem variant="fadeUp">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-            {[
-              {
-                title: "Content Pieces",
-                rawValue: data.totalPieces,
-                prefix: "",
-                suffix: "",
-                change: `+${data.postsThisMonth - 14 > 0 ? '+' : ''}${data.postsThisMonth - 14} this month`,
-                trend: "up" as const,
-                period: "live",
-                icon: <FileText size={15} />,
-                accent: "default" as const,
-              },
-              {
-                title: "Avg. Engagement",
-                rawValue: data.avgEngagement,
-                prefix: "",
-                suffix: "%",
-                change: "−0.3%",
-                trend: "down" as const,
-                period: "rate",
-                icon: <TrendingUp size={15} />,
-                accent: "default" as const,
-              },
-              {
-                title: "Content Revenue",
-                rawValue: data.contentRevenue,
-                prefix: "$",
-                suffix: "",
-                change: "+31%",
-                trend: "up" as const,
-                period: "this month",
-                icon: <DollarSign size={15} />,
-                accent: "cyan" as const,
-              },
-              {
-                title: "Posts This Month",
-                rawValue: data.postsThisMonth,
-                prefix: "",
-                suffix: "",
-                change: `+${data.postsThisMonth - 12}`,
-                trend: "up" as const,
-                period: "pieces published",
-                icon: <Calendar size={15} />,
-                accent: "default" as const,
-              },
-            ].map((kpi, i) => (
-              <GlassKPI
-                key={kpi.title}
-                title={kpi.title}
-                value={`${kpi.prefix}${kpi.rawValue}${kpi.suffix}`}
-                rawValue={kpi.rawValue}
-                prefix={kpi.prefix}
-                suffix={kpi.suffix}
-                change={kpi.change}
-                trend={kpi.trend}
-                period={kpi.period}
-                icon={kpi.icon}
-                accent={kpi.accent}
-                animateValue
-                delay={0.1 + i * 0.07}
-              />
-            ))}
+            {/* We'll compute KPIs from real pieces later; for now static */}
+            <GlassKPI
+              title="Content Pieces"
+              value={`${pieces.length}`}
+              rawValue={pieces.length}
+              prefix=""
+              suffix=""
+              change={`+${pieces.length - 3}`}
+              trend="up"
+              period="live"
+              icon={<FileText size={15} />}
+              accent="default"
+              animateValue
+              delay={0.1}
+            />
+            <GlassKPI
+              title="Avg. Engagement"
+              value="—"
+              rawValue={0}
+              prefix=""
+              suffix="%"
+              change="0%"
+              trend="neutral"
+              period="rate"
+              icon={<TrendingUp size={15} />}
+              accent="default"
+              animateValue
+              delay={0.17}
+            />
+            <GlassKPI
+              title="Content Revenue"
+              value="—"
+              rawValue={0}
+              prefix="$"
+              suffix=""
+              change="0%"
+              trend="neutral"
+              period="this month"
+              icon={<DollarSign size={15} />}
+              accent="cyan"
+              animateValue
+              delay={0.24}
+            />
+            <GlassKPI
+              title="Posts This Month"
+              value={`${pieces.length}`}
+              rawValue={pieces.length}
+              prefix=""
+              suffix=""
+              change={`+${pieces.length - 3}`}
+              trend="up"
+              period="pieces published"
+              icon={<Calendar size={15} />}
+              accent="default"
+              animateValue
+              delay={0.31}
+            />
           </div>
         </AnimatedItem>
 

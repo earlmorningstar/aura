@@ -19,123 +19,77 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRevenueStore, type Transaction } from "@/stores/revenue-store";
 import { createBrowserClient } from "@supabase/ssr";
-import React from "react";
+import type { Transaction } from "@/stores/revenue-store";
 
-/* ─── Supabase client (browser) ──────────────────────────────────── */
-
-function getSupabaseClient() {
+function getSupabase() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
 
-/* ─── Types ──────────────────────────────────────────────────────── */
-
 type NewTransaction = Omit<Transaction, "id">;
-
-/* ─── Hook ───────────────────────────────────────────────────────── */
 
 export function useRevenue() {
   const queryClient = useQueryClient();
-  const localStore = useRevenueStore();
 
-  // ── Server fetch ───────────────────────────────────────────────
-  const {
-    data: serverTransactions,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery<Transaction[]>({
-    queryKey: ["revenue-transactions"],
+  const { data: transactions = [], isLoading, isError, refetch } = useQuery<Transaction[]>({
+    queryKey: ["transactions"],
     queryFn: async () => {
-      const supabase = getSupabaseClient();
+      const supabase = getSupabase();
       const { data, error } = await supabase
-        .from("revenue_transactions")
-        .select("id, date, amount, source, description")
+        .from("transactions")
+        .select("*")
         .order("date", { ascending: false });
 
       if (error) throw new Error(error.message);
-      return (data ?? []) as Transaction[];
+      return (data as Transaction[]) ?? [];
     },
-    initialData: localStore.transactions,
     staleTime: 60 * 1000,
-    retry: 2,
-    // Keep previous data visible while re‑fetching (no skeleton flash)
-    placeholderData: (prev) => prev,
   });
 
-  // ── Merge: server list + local transactions not yet confirmed ──
-  // If the server returns an empty list, we still show local entries.
-  // Once a new transaction is confirmed on the server, its ID will
-  // be present in the server list and the optimistic entry removed.
-  const transactions = React.useMemo<Transaction[]>(() => {
-    const server = serverTransactions ?? [];
-    const local = localStore.transactions;
+  const addMutation = useMutation({
+    mutationFn: async (newTx: NewTransaction) => {
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
-    if (server.length === 0) return local;
-
-    const serverIds = new Set(server.map((t) => t.id));
-    const localOnly = local.filter((t) => !serverIds.has(t.id));
-    return [...server, ...localOnly];
-  }, [serverTransactions, localStore.transactions]);
-
-  // ── Add transaction mutation ────────────────────────────────────
-  const addMutation = useMutation<
-    Transaction,
-    Error,
-    NewTransaction,
-    { optimisticId: string }
-  >({
-    mutationFn: async (newTx) => {
-      const supabase = getSupabaseClient();
       const { data, error } = await supabase
-        .from("revenue_transactions")
-        .insert([{ ...newTx, workspace_id: "personal" }])
-        .select("id, date, amount, source, description")
+        .from("transactions")
+        .insert({
+          ...newTx,
+          user_id: user.id,
+          workspace_id: "personal",
+        })
+        .select("*")
         .single();
 
       if (error) throw new Error(error.message);
       return data as Transaction;
     },
-
-    // Optimistic update: add to local store immediately
-    onMutate: async (newTx) => {
-      await queryClient.cancelQueries({ queryKey: ["revenue-transactions"] });
-      const optimistic = localStore.addTransaction(newTx);
-      return { optimisticId: optimistic.id };
-    },
-
-    // On success: replace optimistic entry with server-returned ID
-    onSuccess: (serverTx, _vars, context) => {
-      if (context?.optimisticId && context.optimisticId !== serverTx.id) {
-        localStore.removeTransaction(context.optimisticId);
-      }
-      void queryClient.invalidateQueries({ queryKey: ["revenue-transactions"] });
-      void queryClient.invalidateQueries({ queryKey: ["revenue-chart-data"] });
-    },
-
-    // On failure: roll back optimistic entry
-    onError: (_err, _vars, context) => {
-      if (context?.optimisticId) {
-        localStore.removeTransaction(context.optimisticId);
-      }
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
   });
 
-  function addTransaction(tx: NewTransaction): void {
-    addMutation.mutate(tx);
-  }
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const supabase = getSupabase();
+      const { error } = await supabase.from("transactions").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
 
   return {
     transactions,
     isLoading,
     isError,
-    isAdding: addMutation.isPending,
-    addTransaction,
-    removeTransaction: localStore.removeTransaction,
+    addTransaction: (tx: NewTransaction) => addMutation.mutate(tx),
+    removeTransaction: (id: string) => deleteMutation.mutate(id),
     refetch,
   };
 }

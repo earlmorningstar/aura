@@ -28,20 +28,19 @@ import { cn } from "@/lib/utils";
 export interface ContentPiece {
   id: string;
   title: string;
-  platform: "YouTube" | "Newsletter" | "Twitter/X" | "Blog" | string;
+  platform: string;
   publishedAt: string;
-  /** e.g. "42%" */
-  engagementRate: string;
-  /** Numeric for trend display */
-  engagementDelta: number;
-  /** USD revenue attributed */
+  engagementRate: string | null;
+  engagementDelta: number | null;
   revenue: number;
-  revenueDelta: number;
+  revenueDelta: number | null;
   views: number;
   likes?: number;
   trend: "up" | "down" | "neutral";
   trendData?: number[];
   url?: string;
+  contentType?: string;
+
 }
 
 /* ─── Fallback data ──────────────────────────────────────────────── */
@@ -144,13 +143,15 @@ function PlatformBadge({ platform }: { platform: string }) {
 
 interface StatChipProps {
   icon: React.ElementType;
-  value: string;
-  delta?: number;
+  value: string | null;
+  delta?: number | null;
   label: string;
 }
 
 function StatChip({ icon: Icon, value, delta, label }: StatChipProps) {
-  const isPositive = delta !== undefined ? delta >= 0 : true;
+  const displayValue = value ?? "—";
+  const isPositive = delta !== null && delta !== undefined ? delta >= 0 : true;
+
   return (
     <div className="flex flex-col gap-0.5">
       <div className="flex items-center gap-1.5">
@@ -164,9 +165,9 @@ function StatChip({ icon: Icon, value, delta, label }: StatChipProps) {
           className="font-display text-sm font-bold"
           style={{ letterSpacing: "var(--tracking-snug)", color: "var(--text-primary)" }}
         >
-          {value}
+          {displayValue}
         </span>
-        {delta !== undefined && (
+        {delta !== null && delta !== undefined && (
           <span
             className="text-[10px] font-semibold"
             style={{
@@ -180,6 +181,7 @@ function StatChip({ icon: Icon, value, delta, label }: StatChipProps) {
     </div>
   );
 }
+
 
 /* ─── Single content card ────────────────────────────────────────── */
 
