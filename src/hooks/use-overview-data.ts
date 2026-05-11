@@ -7,7 +7,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { differenceInDays, format } from "date-fns";
-
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { useRevenue } from "@/hooks/use-revenue";
 
@@ -47,7 +46,9 @@ interface Transaction {
 
 function deriveOverviewData(
   transactions: Transaction[],
-  days: number
+  days: number,
+  startDate: Date,
+  endDate: Date,
 ): OverviewData {
   const safeTransactions = transactions ?? [];
 
@@ -78,29 +79,24 @@ function deriveOverviewData(
   // =========================
   // REVENUE TREND
   // =========================
-  const trendMap = new Map<string, number>();
+  const filledTrend = new Map<string, number>();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    filledTrend.set(format(d, "MMM dd"), 0);
+  }
 
   safeTransactions.forEach((tx) => {
     if (!tx.date) return;
-
     const key = format(new Date(tx.date), "MMM dd");
-
-    trendMap.set(
-      key,
-      (trendMap.get(key) ?? 0) + Number(tx.amount || 0)
-    );
+    if (filledTrend.has(key)) {
+      filledTrend.set(key, (filledTrend.get(key) ?? 0) + Number(tx.amount || 0));
+    }
   });
 
-  const revenueTrend = Array.from(trendMap.entries())
-    .sort(([a], [b]) => {
-      const aDate = new Date(a).getTime();
-      const bDate = new Date(b).getTime();
-      return aDate - bDate;
-    })
-    .map(([date, value]) => ({
-      date,
-      value,
-    }));
+  const revenueTrend = Array.from(filledTrend.entries())
+    .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+    .map(([date, value]) => ({ date, value }));
 
   // =========================
   // BASIC TREND ESTIMATION
@@ -218,6 +214,29 @@ function deriveOverviewData(
     actions.push("Maintain current publishing consistency");
   }
 
+  // Audience placeholder KPIs (will be real once audience data is connected)
+  kpis.push({
+    title: "Audience Growth",
+    value: "+0",
+    rawValue: 0,
+    prefix: "+",
+    change: "+0%",
+    trend: "neutral",
+    period: "new followers",
+    accent: "default",
+    icon: null,
+  }, {
+    title: "Avg. Engagement",
+    value: "0%",
+    rawValue: 0,
+    suffix: "%",
+    change: "0%",
+    trend: "neutral",
+    period: "rate",
+    accent: "default",
+    icon: null,
+  });
+
   return {
     kpis,
     revenueTrend,
@@ -254,7 +273,7 @@ export function useOverviewData() {
         const txDate = new Date(tx.date);
         return txDate >= startDate && txDate <= endDate;
       });
-      return deriveOverviewData(filteredTransactions, days);
+      return deriveOverviewData(filteredTransactions, days, startDate, endDate);
     },
 
     initialData: () => {
@@ -263,7 +282,7 @@ export function useOverviewData() {
         const txDate = new Date(tx.date);
         return txDate >= startDate && txDate <= endDate;
       });
-      return deriveOverviewData(filteredTransactions, days);
+      return deriveOverviewData(filteredTransactions, days, startDate, endDate);
     },
     staleTime: 30 * 1000,
     placeholderData: (previousData) => previousData,

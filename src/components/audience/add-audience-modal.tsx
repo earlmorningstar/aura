@@ -9,9 +9,10 @@ import { supabase } from "@/lib/supabase/client";
 interface Props {
     open: boolean;
     onClose: () => void;
+    onComplete?: () => void;
 }
 
-export function AddAudienceModal({ open, onClose }: Props) {
+export function AddAudienceModal({ open, onClose, onComplete }: Props) {
     const [form, setForm] = useState({
         platform: "YouTube",
         followers: "",
@@ -47,6 +48,7 @@ export function AddAudienceModal({ open, onClose }: Props) {
         }
 
         setSuccess(true);
+        onComplete?.();
         setTimeout(() => {
             onClose();
             setSuccess(false);

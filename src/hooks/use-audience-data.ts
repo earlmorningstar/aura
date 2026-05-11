@@ -33,6 +33,6 @@ export function useAudienceData() {
       if (error) throw new Error(error.message);
       return data as AudienceRecord[];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

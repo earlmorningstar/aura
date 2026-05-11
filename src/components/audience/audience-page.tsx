@@ -214,63 +214,78 @@ function TopContentRow({ title, platform, views, newFollowers, index }: TopConte
 
 /* ─── Derive UI shape from audience records ────────────────────── */
 
+type TopContentItem = {
+  title: string;
+  platform: string;
+  views: string;
+  newFollowers: string;
+};
+
+const EMPTY_TOP_CONTENT: TopContentItem[] = [];
+
 function deriveFromRecords(records: AudienceRecord[]) {
   if (records.length === 0) {
     return {
-      totalFollowers: 15660,
-      newThisMonth: 1284,
-      avgEngagement: 4.8,
-      avgViews: 22400,
-      platforms: [
-        { name: "YouTube", followers: 8420, delta: "+320 this month", engagementRate: "5.2%", avgViews: "28.4K" },
-        { name: "Twitter / X", followers: 4280, delta: "+88 this month", engagementRate: "3.7%", avgViews: "12.1K" },
-        { name: "Newsletter", followers: 2960, delta: "+142 this month", engagementRate: "42.1%", avgViews: "2.96K" },
-      ],
-      topContent: [
-        { title: "No-code tools for solopreneurs in 2026", platform: "YouTube", views: "48.2K", newFollowers: "+384" },
-        { title: "How I made $10K from a single email sequence", platform: "Newsletter", views: "12.4K", newFollowers: "+142" },
-        { title: "Thread: 10 lessons from my first year building", platform: "X", views: "28.7K", newFollowers: "+267" },
-        { title: "Full stack in 2026 — what actually matters", platform: "YouTube", views: "33.1K", newFollowers: "+198" },
-      ],
-      growthData: [
-        { date: "Apr 1", followers: 11200, newFollowers: 180 },
-        { date: "Apr 5", followers: 11800, newFollowers: 210 },
-        { date: "Apr 9", followers: 12400, newFollowers: 240 },
-        { date: "Apr 13", followers: 12800, newFollowers: 195 },
-        { date: "Apr 17", followers: 13400, newFollowers: 285 },
-        { date: "Apr 21", followers: 14100, newFollowers: 310 },
-        { date: "Apr 25", followers: 14800, newFollowers: 265 },
-        { date: "Apr 29", followers: 15600, newFollowers: 350 },
-      ],
+      totalFollowers: 0,
+      newThisMonth: 0,
+      avgEngagement: 0,
+      avgViews: 0,
+      platforms: [],
+      topContent: EMPTY_TOP_CONTENT,
+      growthData: [{ date: "No data", followers: 0, newFollowers: 0 }],
     };
   }
 
   const totalFollowers = records.reduce((sum, r) => sum + r.followers, 0);
   const newThisMonth = records.reduce((sum, r) => sum + r.new_followers, 0);
+
   const avgEngagement = records.length
     ? Math.round((records.reduce((sum, r) => sum + (r.engagement_rate ?? 0), 0) / records.length) * 10) / 10
     : 0;
+
   const avgViews = records.length
     ? Math.round(records.reduce((sum, r) => sum + (r.avg_views ?? 0), 0) / records.length)
     : 0;
 
-  const byPlatform: Record<string, { followers: number; new_followers: number }> = {};
-  for (const r of records) {
-    if (!byPlatform[r.platform]) {
-      byPlatform[r.platform] = { followers: 0, new_followers: 0 };
+  // Group by platform
+  const platformMap: Record<string, { followers: number; new_followers: number; engagements: number; views: number; count: number }> = {};
+
+  records.forEach((r) => {
+    if (!platformMap[r.platform]) {
+      platformMap[r.platform] = { followers: 0, new_followers: 0, engagements: 0, views: 0, count: 0 };
     }
-    const entry = byPlatform[r.platform]!;
+    const entry = platformMap[r.platform]!;
     entry.followers += r.followers;
     entry.new_followers += r.new_followers;
-  }
+    entry.engagements += r.engagement_rate ?? 0;
+    entry.views += r.avg_views ?? 0;
+    entry.count += 1;
+  });
 
-  const platforms = Object.entries(byPlatform).map(([name, d]) => ({
+  const platforms = Object.entries(platformMap).map(([name, d]) => ({
     name,
     followers: d.followers,
-    delta: `+${d.new_followers} this month`,
-    engagementRate: "—",
-    avgViews: "—",
+    delta: `+${d.new_followers}`,
+    engagementRate: d.count ? `${(d.engagements / d.count).toFixed(1)}%` : "—",
+    avgViews: d.count ? Math.round(d.views / d.count).toLocaleString() : "—",
   }));
+
+  // Growth data grouped by date
+  const dateMap: Record<string, { followers: number; new_followers: number }> = {};
+  records.forEach((r) => {
+    const key = r.recorded_date;
+    if (!dateMap[key]) dateMap[key] = { followers: 0, new_followers: 0 };
+    dateMap[key].followers += r.followers;
+    dateMap[key].new_followers += r.new_followers;
+  });
+
+  const growthData = Object.entries(dateMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, vals]) => ({
+      date,
+      followers: vals.followers,
+      newFollowers: vals.new_followers,
+    }));
 
   return {
     totalFollowers,
@@ -278,15 +293,15 @@ function deriveFromRecords(records: AudienceRecord[]) {
     avgEngagement,
     avgViews,
     platforms,
-    topContent: [],
-    growthData: [],
+    topContent: EMPTY_TOP_CONTENT,
+    growthData: growthData.length ? growthData : [{ date: "No data", followers: 0, newFollowers: 0 }],
   };
 }
 
 /* ─── AudiencePage ───────────────────────────────────────────────── */
 
 export function AudiencePage() {
-  const { data: records, isLoading } = useAudienceData();
+  const { data: records, isLoading, refetch } = useAudienceData();
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const ui = deriveFromRecords(records ?? []);
 
@@ -415,7 +430,7 @@ export function AudiencePage() {
         </AnimatedItem>
 
       </AnimatedGroup>
-      <AddAudienceModal open={audienceModalOpen} onClose={() => setAudienceModalOpen(false)} />
+      <AddAudienceModal open={audienceModalOpen} onClose={() => setAudienceModalOpen(false)} onComplete={() => refetch()} />
     </AnimatedPage>
   );
 }

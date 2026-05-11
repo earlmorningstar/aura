@@ -33,9 +33,18 @@ const RevenueCharts = dynamic(
 /* ─── Page header metrics ────────────────────────────────────────── */
 
 function PageMetrics() {
+  const { transactions } = useRevenue();
+  const total = transactions.reduce((sum, t) => sum + t.amount, 0);
+  const mrr = transactions.length > 0 ? (total / transactions.length) * 30 : 0;
+  const sorted = [...transactions].sort((a, b) => a.date.localeCompare(b.date));
+  const mid = Math.floor(sorted.length / 2);
+  const firstHalf = sorted.slice(0, mid).reduce((s, t) => s + t.amount, 0);
+  const secondHalf = sorted.slice(mid).reduce((s, t) => s + t.amount, 0);
+  const growth = firstHalf ? (((secondHalf - firstHalf) / firstHalf) * 100).toFixed(1) : "0";
+  const isPositive = parseFloat(growth) >= 0;
+
   return (
     <div className="flex flex-wrap items-center gap-3">
-      {/* MRR chip */}
       <motion.div
         className="flex items-center gap-2 rounded-xl px-3 py-2"
         style={{
@@ -46,28 +55,24 @@ function PageMetrics() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 320, damping: 26, delay: 0.15 }}
       >
-        <DollarSign
-          size={14}
-          aria-hidden
-          style={{ color: "var(--accent-cyan)" }}
-        />
+        <DollarSign size={14} aria-hidden style={{ color: "var(--accent-cyan)" }} />
         <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
           MRR{" "}
-          <span
-            className="font-display font-bold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            $3,240
+          <span className="font-display font-bold" style={{ color: "var(--text-primary)" }}>
+            ${mrr.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </span>
         </span>
       </motion.div>
 
-      {/* Growth chip */}
       <motion.div
         className="flex items-center gap-2 rounded-xl px-3 py-2"
         style={{
-          background: "rgba(var(--status-success-rgb) / 0.08)",
-          border: "1px solid rgba(var(--status-success-rgb) / 0.15)",
+          background: isPositive
+            ? "rgba(var(--status-success-rgb) / 0.08)"
+            : "rgba(var(--status-error-rgb) / 0.08)",
+          border: isPositive
+            ? "1px solid rgba(var(--status-success-rgb) / 0.15)"
+            : "1px solid rgba(var(--status-error-rgb) / 0.15)",
         }}
         initial={{ opacity: 0, scale: 0.92 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -76,13 +81,13 @@ function PageMetrics() {
         <TrendingUp
           size={14}
           aria-hidden
-          style={{ color: "var(--status-success)" }}
+          style={{ color: isPositive ? "var(--status-success)" : "var(--status-error)" }}
         />
         <span
           className="text-sm font-semibold"
-          style={{ color: "var(--status-success)" }}
+          style={{ color: isPositive ? "var(--status-success)" : "var(--status-error)" }}
         >
-          +18.4% this month
+          {isPositive ? "+" : ""}{growth}% this period
         </span>
       </motion.div>
     </div>

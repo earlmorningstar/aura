@@ -23,6 +23,8 @@ import { AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { SkeletonDashboard, SkeletonChart } from "@/components/ui/loading-skeleton";
 import { GlassButton } from "@/components/ui/glass-button";
 import { useOverviewData } from "@/hooks/use-overview-data";
+import { useContentPieces } from "@/hooks/use-content-pieces";
+import { useRevenue } from "@/hooks/use-revenue";
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { differenceInDays } from "date-fns";
 
@@ -126,11 +128,18 @@ function DashboardError({
 /* ─── Quick stats row (bottom) ───────────────────────────────────── */
 
 function QuickStatsRow() {
+  const { transactions } = useRevenue();
+  const { pieces: contentPieces } = useContentPieces();
+
+  const totalRevenue = transactions.reduce((sum, t) => sum + t.amount, 0);
+  const contentCount = contentPieces.length;
+  const avgRevenuePerPost = contentCount > 0 ? Math.round(totalRevenue / contentCount) : 0;
+
   const stats = [
-    { label: "Active subscribers", value: "4,820", unit: "" },
-    { label: "Content pieces live", value: "38", unit: "" },
-    { label: "Avg. revenue per post", value: "$74.5", unit: "" },
-    { label: "Est. next payout", value: "$3,400", unit: "" },
+    { label: "Active subscribers", value: "—", unit: "" },            // placeholder until audience integration
+    { label: "Content pieces live", value: String(contentCount), unit: "" },
+    { label: "Avg. revenue per post", value: `$${avgRevenuePerPost.toLocaleString()}`, unit: "" },
+    { label: "Est. next payout", value: "$3,400", unit: "" },         // placeholder
   ] as const;
 
   return (
@@ -180,6 +189,7 @@ export function OverviewPageContent() {
   const { startDate, endDate } = useDateRangeStore();
   const days = differenceInDays(endDate, startDate);
   const { isLoading, isError, refetch } = useOverviewData();
+  const { pieces: contentPieces } = useContentPieces();
 
   // Full-page skeleton while initial data loads
   if (isLoading) {
