@@ -120,7 +120,7 @@ export function KPIGrid() {
   // Loading skeleton – consistent grid breakpoints
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
         {Array.from({ length: 6 }).map((_, i) => (
           <SkeletonKPI key={i} />
         ))}
@@ -135,7 +135,7 @@ export function KPIGrid() {
     <AnimatedGroup
       stagger={0.06}
       delayChildren={0.05}
-      className="grid grid-cols-2 lg:grid-cols-3"
+      className="grid grid-cols-2 lg:grid-cols-3 gap-2"
     >
       {kpis.map((kpi, i) => (
         <AnimatedItem key={kpi.title} variant="fadeUp" distance={12}>

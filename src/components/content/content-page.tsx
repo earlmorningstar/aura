@@ -57,7 +57,7 @@ interface AddContentForm {
   likes: string;
 }
 
-const PLATFORMS = ["YouTube", "Newsletter", "Twitter/X", "Blog"] as const;
+// const PLATFORMS = ["YouTube", "Newsletter", "Twitter/X", "Blog"] as const;
 const CONTENT_TYPES: ContentType[] = ["post", "video", "newsletter"];
 
 function generateId() {
