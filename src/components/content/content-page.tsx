@@ -38,8 +38,9 @@ import { GlassButton } from "@/components/ui/glass-button";
 import { GlassKPI } from "@/components/ui/glass-kpi";
 import { AnimatedPage, AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { cn } from "@/lib/utils";
-// import { useContentData } from "@/hooks/use-content-data";
+import { eachDayOfInterval, subWeeks, format, getDay } from "date-fns";
 import { useContentPieces } from "@/hooks/use-content-pieces";
+import { useState } from "react";
 
 /* ─── Minimal “Add Content” Modal ────────────────────────────────── */
 
@@ -50,6 +51,10 @@ interface AddContentForm {
   platform: string;
   date: string;
   type: ContentType;
+  engagementRate: string;
+  revenue: string;
+  views: string;
+  likes: string;
 }
 
 const PLATFORMS = ["YouTube", "Newsletter", "Twitter/X", "Blog"] as const;
@@ -69,13 +74,19 @@ interface AddContentModalProps {
 }
 
 function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
-  const [form, setForm] = React.useState<AddContentForm>({
+  const [submitting, setSubmitting] = useState(false);
+  const [useCustomPlatform, setUseCustomPlatform] = useState(false);
+  const [customPlatform, setCustomPlatform] = useState("");
+  const [form, setForm] = useState<AddContentForm>({
     title: "",
     platform: "YouTube",
     date: new Date().toISOString().slice(0, 10),
     type: "video",
+    engagementRate: "",
+    revenue: "",
+    views: "",
+    likes: "",
   });
-  const [submitting, setSubmitting] = React.useState(false);
 
   const update = (key: keyof AddContentForm, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -89,13 +100,15 @@ function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
     const newPiece: ContentPiece = {
       id: generateId(),
       title: form.title.trim(),
-      platform: form.platform,
+      platform: useCustomPlatform ? customPlatform.trim() : form.platform,
       publishedAt: form.date,
-      engagementRate: "—",
-      engagementDelta: 0,
-      revenue: 0,
-      revenueDelta: 0,
-      views: 0,
+      contentType: form.type,
+      engagementRate: form.engagementRate || null,
+      engagementDelta: null,
+      revenue: parseFloat(form.revenue || "0"),
+      revenueDelta: null,
+      views: parseInt(form.views || "0"),
+      likes: parseInt(form.likes || "0"),
       trend: "neutral",
       trendData: [],
     };
@@ -128,7 +141,7 @@ function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
 
           {/* Modal panel */}
           <motion.div
-            className="relative w-full max-w-md rounded-2xl p-6"
+            className="relative w-full max-w-md rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
             style={{
               background: "rgba(10,10,18,0.92)",
               backdropFilter: "blur(24px) saturate(180%)",
@@ -170,20 +183,50 @@ function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
                 />
               </label>
 
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                  Platform
-                </span>
-                <select
-                  className="input"
-                  value={form.platform}
-                  onChange={(e) => update("platform", e.target.value)}
-                >
-                  {PLATFORMS.map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-              </label>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Platform</span>
+                {!useCustomPlatform ? (
+                  <div className="flex gap-2 items-center">
+                    <select
+                      className="input flex-1"
+                      value={form.platform}
+                      onChange={(e) => update("platform", e.target.value)}
+                    >
+                      <option>YouTube</option>
+                      <option>Twitter/X</option>
+                      <option>Newsletter</option>
+                      <option>TikTok</option>
+                      <option>Instagram</option>
+                      <option>Blog</option>
+                      <option>Other</option>
+                    </select>
+                    <button
+                      type="button"
+                      className="text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-1 hover:bg-white/10 transition-colors text-cyan-400"
+                      onClick={() => setUseCustomPlatform(true)}
+                    >
+                      Custom
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      className="input flex-1"
+                      placeholder="e.g. Patreon"
+                      value={customPlatform}
+                      onChange={(e) => setCustomPlatform(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-1 hover:bg-white/10 transition-colors text-white/60"
+                      onClick={() => setUseCustomPlatform(false)}
+                    >
+                      Back
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
@@ -225,6 +268,23 @@ function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
                   ))}
                 </div>
               </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Engagement Rate (%)</span>
+                <input type="number" step="0.1" className="input" placeholder="5.2" value={form.engagementRate} onChange={(e) => update("engagementRate", e.target.value)} />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Revenue ($)</span>
+                <input type="number" step="0.01" className="input" placeholder="1290" value={form.revenue} onChange={(e) => update("revenue", e.target.value)} />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Views</span>
+                <input type="number" className="input" placeholder="48200" value={form.views} onChange={(e) => update("views", e.target.value)} />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Likes</span>
+                <input type="number" className="input" placeholder="2840" value={form.likes} onChange={(e) => update("likes", e.target.value)} />
+              </label>
             </div>
 
             {/* Save button */}
@@ -241,10 +301,11 @@ function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
                 Add Content
               </GlassButton>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div >
+        </motion.div >
+      )
+      }
+    </AnimatePresence >
   );
 }
 
@@ -336,6 +397,8 @@ interface ContentFilterBarProps {
   onPlatform: (p: PlatformFilter) => void;
   viewMode: "grid" | "list";
   onViewMode: (v: "grid" | "list") => void;
+  search: string;
+  onSearch: (value: string) => void;
 }
 
 function ContentFilterBar({
@@ -345,6 +408,8 @@ function ContentFilterBar({
   onPlatform,
   viewMode,
   onViewMode,
+  search,
+  onSearch,
 }: ContentFilterBarProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -366,6 +431,21 @@ function ContentFilterBar({
             onClick={() => onPlatform(p)}
           />
         ))}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          className="input text-sm"
+          placeholder="Search content..."
+          value={search}
+          onChange={(e) => onSearch(e.target.value)}
+        />
+        {search && (
+          <button onClick={() => onSearch("")} className="text-white/50 hover:text-white">
+            <X size={14} />
+          </button>
+        )}
       </div>
 
       {/* Right: Sort + view toggle */}
@@ -423,112 +503,77 @@ function ContentFilterBar({
   );
 }
 
-/* ─── Publishing cadence heatmap (unchanged) ─────────────────────── */
+/* ─── Publishing cadence heatmap ─────────────────────── */
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const WEEKS = 12;
+// const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+// const WEEKS = 12;
 
-function getPostingIntensity(week: number, day: number): number {
-  const seed = (week * 7 + day) * 2654435761;
-  const val = (seed ^ (seed >> 16)) % 5;
-  if (day >= 5) return Math.min(val, 1);
-  return val as 0 | 1 | 2 | 3 | 4;
-}
+// function getPostingIntensity(week: number, day: number): number {
+//   const seed = (week * 7 + day) * 2654435761;
+//   const val = (seed ^ (seed >> 16)) % 5;
+//   if (day >= 5) return Math.min(val, 1);
+//   return val as 0 | 1 | 2 | 3 | 4;
+// }
 
-const INTENSITY_STYLES = [
-  "rgba(var(--glass-bg-rgb) / 0.06)",
-  "rgba(var(--accent-cyan-rgb) / 0.12)",
-  "rgba(var(--accent-cyan-rgb) / 0.28)",
-  "rgba(var(--accent-cyan-rgb) / 0.52)",
-  "rgba(var(--accent-cyan-rgb) / 0.80)",
-];
+// const INTENSITY_STYLES = [
+//   "rgba(var(--glass-bg-rgb) / 0.06)",
+//   "rgba(var(--accent-cyan-rgb) / 0.12)",
+//   "rgba(var(--accent-cyan-rgb) / 0.28)",
+//   "rgba(var(--accent-cyan-rgb) / 0.52)",
+//   "rgba(var(--accent-cyan-rgb) / 0.80)",
+// ];
 
-function PublishingHeatmap() {
+function RealPublishingHeatmap() {
+  const { pieces } = useContentPieces();
+  const today = new Date();
+  const start = subWeeks(today, 11); // last 12 weeks
+  const allDays = eachDayOfInterval({ start, end: today });
+
+  const postMap = new Map<string, number>();
+  pieces.forEach(p => {
+    const key = p.publishedAt; // YYYY-MM-DD
+    postMap.set(key, (postMap.get(key) ?? 0) + 1);
+  });
+
+  const weeks: string[][] = [];
+  let currentWeek: string[] = [];
+  allDays.forEach(day => {
+    if (getDay(day) === 0 && currentWeek.length > 0) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+    currentWeek.push(format(day, "yyyy-MM-dd"));
+  });
+  if (currentWeek.length > 0) weeks.push(currentWeek);
+
+  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   return (
     <GlassCard visual="default" padding="md">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h2
-            className="font-display font-semibold"
-            style={{ fontSize: "var(--text-lg)", letterSpacing: "var(--tracking-snug)", color: "var(--text-primary)" }}
-          >
-            Publishing Cadence
-          </h2>
-          <p className="mt-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
-            Last 12 weeks of content output
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Less</span>
-          {INTENSITY_STYLES.map((bg, i) => (
-            <span
-              key={i}
-              className="h-3 w-3 rounded-sm"
-              style={{ background: bg, border: "1px solid rgba(255,255,255,0.05)" }}
-              aria-hidden
-            />
-          ))}
-          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>More</span>
-        </div>
-      </div>
-
+      <h2 className="font-display font-semibold text-lg mb-4" style={{ color: "var(--text-primary)" }}>Publishing Cadence</h2>
       <div className="overflow-x-auto">
         <div className="flex gap-3">
-          {/* Day labels */}
           <div className="flex flex-col gap-1 pt-5">
-            {DAYS.map((d) => (
-              <span
-                key={d}
-                className="flex h-3 items-center text-[9px]"
-                style={{ color: "var(--text-muted)", width: "20px" }}
-              >
-                {d}
-              </span>
+            {DAYS.map(d => (
+              <span key={d} className="flex h-3 items-center text-[9px]" style={{ color: "var(--text-muted)", width: "20px" }}>{d}</span>
             ))}
           </div>
-
-          {/* Grid */}
           <div className="flex gap-1">
-            {Array.from({ length: WEEKS }, (_, w) => (
-              <div key={w} className="flex flex-col gap-1">
-                {w === 0 && (
-                  <span
-                    className="mb-1 text-[9px]"
-                    style={{ color: "var(--text-muted)", height: "12px", lineHeight: "12px" }}
-                  >
-                    12w ago
-                  </span>
-                )}
-                {w === WEEKS - 1 && (
-                  <span
-                    className="mb-1 text-[9px]"
-                    style={{ color: "var(--text-muted)", height: "12px", lineHeight: "12px" }}
-                  >
-                    This week
-                  </span>
-                )}
-                {w !== 0 && w !== WEEKS - 1 && (
-                  <span style={{ height: "16px" }} aria-hidden />
-                )}
-                {DAYS.map((_, d) => {
-                  const intensity = getPostingIntensity(w, d);
+            {weeks.map((week, wi) => (
+              <div key={wi} className="flex flex-col gap-1">
+                {DAYS.map((_, di) => {
+                  const dateKey = week[di] || "";
+                  const count = postMap.get(dateKey) ?? 0;
+                  const intensity = Math.min(count, 4);
+                  const bg = intensity === 0
+                    ? "rgba(var(--glass-bg-rgb) / 0.06)"
+                    : `rgba(var(--accent-cyan-rgb) / ${0.1 + intensity * 0.2})`;
                   return (
                     <motion.span
-                      key={d}
+                      key={di}
                       className="h-3 w-3 rounded-sm"
-                      style={{
-                        background: INTENSITY_STYLES[intensity],
-                        border: "1px solid rgba(255,255,255,0.04)",
-                      }}
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 28,
-                        delay: 0.3 + (w * 7 + d) * 0.004,
-                      }}
-                      title={`Week ${w + 1}, ${DAYS[d]}: ${intensity > 0 ? `${intensity} post${intensity > 1 ? "s" : ""}` : "No posts"}`}
+                      style={{ background: bg, border: "1px solid rgba(255,255,255,0.04)" }}
+                      title={`${dateKey}: ${count} post${count !== 1 ? 's' : ''}`}
                     />
                   );
                 })}
@@ -551,12 +596,22 @@ export function ContentPage() {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [modalOpen, setModalOpen] = React.useState(false);
   const [showToast, setShowToast] = React.useState(false);
+  const [search, setSearch] = useState("");
 
   const displayedPieces = React.useMemo(() => {
     let filtered = pieces;
 
     if (platform !== "all") {
       filtered = filtered.filter((p) => p.platform === platform);
+    }
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.platform.toLowerCase().includes(q)
+      );
     }
 
     const sorted = [...filtered].sort((a, b) => {
@@ -575,22 +630,16 @@ export function ContentPage() {
     });
 
     return sorted;
-  }, [pieces, platform, sort]);
+  }, [pieces, platform, sort, search]);
+
+  const avgEngagement = displayedPieces.length
+    ? displayedPieces.reduce((sum, p) => sum + (parseFloat(p.engagementRate ?? "0") || 0), 0) / displayedPieces.length
+    : 0;
+
+  const contentRevenue = displayedPieces.reduce((sum, p) => sum + p.revenue, 0);
 
   const handleAddPiece = (newPiece: ContentPiece) => {
-    addPiece({
-      title: newPiece.title,
-      platform: newPiece.platform,
-      publishedAt: newPiece.publishedAt,
-      contentType: "video",
-      engagementRate: null,
-      engagementDelta: null,
-      revenue: 0,
-      revenueDelta: null,
-      views: 0,
-      likes: 0,
-      trend: "neutral",
-    });
+    addPiece(newPiece);
     setShowToast(true);
   };
 
@@ -646,8 +695,8 @@ export function ContentPage() {
             />
             <GlassKPI
               title="Avg. Engagement"
-              value="—"
-              rawValue={0}
+              value={`${avgEngagement.toFixed(1)}`}
+              rawValue={avgEngagement}
               prefix=""
               suffix="%"
               change="0%"
@@ -660,8 +709,8 @@ export function ContentPage() {
             />
             <GlassKPI
               title="Content Revenue"
-              value="—"
-              rawValue={0}
+              value={`${contentRevenue.toFixed(2)}`}
+              rawValue={contentRevenue}
               prefix="$"
               suffix=""
               change="0%"
@@ -699,17 +748,24 @@ export function ContentPage() {
               onPlatform={setPlatform}
               viewMode={viewMode}
               onViewMode={setViewMode}
+              search={search}
+              onSearch={setSearch}
             />
             <ContentPerformanceCards
               pieces={displayedPieces}
               viewMode={viewMode}
             />
+            {displayedPieces.length === 0 && search.trim() && (
+              <div className="text-center py-12 text-sm text-white/50">
+                No content matches ”{search}”.
+              </div>
+            )}
           </div>
         </AnimatedItem>
 
         {/* ── Section 4: Publishing heatmap ─────────────────── */}
         <AnimatedItem variant="fadeUp">
-          <PublishingHeatmap />
+          <RealPublishingHeatmap />
         </AnimatedItem>
       </AnimatedGroup>
 

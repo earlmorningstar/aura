@@ -430,7 +430,11 @@ export function AudiencePage() {
         </AnimatedItem>
 
       </AnimatedGroup>
-      <AddAudienceModal open={audienceModalOpen} onClose={() => setAudienceModalOpen(false)} onComplete={() => refetch()} />
+      <AddAudienceModal
+        open={audienceModalOpen}
+        onClose={() => setAudienceModalOpen(false)}
+        onComplete={() => refetch()}
+      />
     </AnimatedPage>
   );
 }

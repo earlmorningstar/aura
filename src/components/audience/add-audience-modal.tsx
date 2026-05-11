@@ -13,6 +13,10 @@ interface Props {
 }
 
 export function AddAudienceModal({ open, onClose, onComplete }: Props) {
+    const [submitting, setSubmitting] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [useCustom, setUseCustom] = useState(false);
+    const [customPlatform, setCustomPlatform] = useState("");
     const [form, setForm] = useState({
         platform: "YouTube",
         followers: "",
@@ -21,14 +25,15 @@ export function AddAudienceModal({ open, onClose, onComplete }: Props) {
         avg_views: "",
         recorded_date: new Date().toISOString().slice(0, 10),
     });
-    const [submitting, setSubmitting] = useState(false);
-    const [success, setSuccess] = useState(false);
 
     const handleSubmit = async () => {
         if (!form.platform || !form.followers) return;
         setSubmitting(true);
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+            setSubmitting(false);
+            return;
+        }
 
         const { error } = await supabase.from("audience_data").insert({
             user_id: user.id,
@@ -47,13 +52,21 @@ export function AddAudienceModal({ open, onClose, onComplete }: Props) {
             return;
         }
 
-        setSuccess(true);
         onComplete?.();
+        setSuccess(true);
         setTimeout(() => {
             onClose();
             setSuccess(false);
-            setForm({ ...form, followers: "", new_followers: "", engagement_rate: "", avg_views: "" });
-        }, 1500);
+            setForm({
+                platform: "YouTube",
+                followers: "",
+                new_followers: "",
+                engagement_rate: "",
+                avg_views: "",
+                recorded_date: new Date().toISOString().slice(0, 10),
+            });
+            setSubmitting(false);
+        }, 500);
     };
 
     return (
@@ -81,13 +94,52 @@ export function AddAudienceModal({ open, onClose, onComplete }: Props) {
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     <label className="flex flex-col gap-1">
-                                        <span className="text-xs text-white/50 uppercase">Platform</span>
-                                        <select className="input" value={form.platform} onChange={e => setForm({ ...form, platform: e.target.value })}>
-                                            <option>YouTube</option>
-                                            <option>Twitter/X</option>
-                                            <option>Newsletter</option>
-                                            <option>Blog</option>
-                                        </select>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs text-white/50 uppercase">Platform</span>
+                                            {!useCustom ? (
+                                                <div className="flex gap-2 items-center">
+                                                    <select
+                                                        className="input flex-1"
+                                                        value={form.platform}
+                                                        onChange={(e) => setForm({ ...form, platform: e.target.value })}
+                                                    >
+                                                        <option>YouTube</option>
+                                                        <option>Twitter/X</option>
+                                                        <option>Newsletter</option>
+                                                        <option>TikTok</option>
+                                                        <option>Instagram</option>
+                                                        <option>Blog</option>
+                                                        <option>Other</option>
+                                                    </select>
+                                                    {form.platform === "Other" && (
+                                                        <button
+                                                            type="button"
+                                                            className="text-xs text-cyan-400 underline whitespace-nowrap"
+                                                            onClick={() => setUseCustom(true)}
+                                                        >
+                                                            Enter custom
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-2 items-center">
+                                                    <input
+                                                        type="text"
+                                                        className="input flex-1"
+                                                        placeholder="e.g. Patreon"
+                                                        value={customPlatform}
+                                                        onChange={(e) => setCustomPlatform(e.target.value)}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="text-xs text-white/60 underline whitespace-nowrap"
+                                                        onClick={() => setUseCustom(false)}
+                                                    >
+                                                        Back to list
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </label>
                                     <label className="flex flex-col gap-1">
                                         <span className="text-xs text-white/50 uppercase">Followers</span>
