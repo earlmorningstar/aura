@@ -8,42 +8,58 @@
 import { NextResponse, type NextRequest } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
-    // Temporary debug: list all cookie names reaching this route
-    const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll();
-    console.log(
-      "[ai-chat] Cookie names:",
-      allCookies
-        .map((c: { name: string; value: string }) => c.name)
-        .join(", ")
-    );
-
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      console.error("[ai-chat] Auth error:", authError?.message);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
+    const body = await req.json() as { question?: string };
     const question = body.question?.trim();
     if (!question) {
       return NextResponse.json({ error: "Question is required" }, { status: 400 });
     }
 
+    // Fetch user data for context
+    const transResult = await supabase
+      .from("transactions")
+      .select("amount, date, source")
+      .eq("user_id", user.id)
+      .order("date", { ascending: false })
+      .limit(20);
+    const transactions = transResult.data ?? [];
+
+    const contentResult = await supabase
+      .from("content_pieces")
+      .select("title, platform, engagement_rate, revenue, views, published_at")
+      .eq("user_id", user.id)
+      .order("published_at", { ascending: false })
+      .limit(10);
+    const content = contentResult.data ?? [];
+
+    const audResult = await supabase
+      .from("audience_data")
+      .select("platform, followers, new_followers, engagement_rate")
+      .eq("user_id", user.id)
+      .order("recorded_date", { ascending: false })
+      .limit(10);
+    const audience = audResult.data ?? [];
+
+    const totalRevenue = transactions.reduce((sum, t) => sum + t.amount, 0);
+    const context = `
+User data:
+- Total revenue (recent): $${totalRevenue.toLocaleString()}
+- Recent transactions: ${transactions.slice(0, 5).map(t => `$${t.amount} from ${t.source}`).join(", ")}
+- Content pieces: ${content.length} total, top: ${content.slice(0, 3).map(c => `"${c.title}" (${c.platform})`).join(", ")}
+- Audience: ${audience.slice(0, 5).map(a => `${a.platform}: ${a.followers.toLocaleString()} followers`).join(", ")}
+`;
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({
-        answer: "I'm currently unavailable. Please try again later.",
-      });
+      return NextResponse.json({ answer: "I'm currently unavailable. Please try again later." });
     }
 
     const openai = new OpenAI({ apiKey });
@@ -52,8 +68,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content:
-            "You are Aura AI, a helpful and concise business assistant for creators. Keep answers brief and friendly.",
+          content: `You are Aura AI, a helpful and concise business assistant for creators. Use the following user data to give personalised answers.\n\n${context}`,
         },
         { role: "user", content: question },
       ],
@@ -61,16 +76,10 @@ export async function POST(req: NextRequest) {
       temperature: 0.7,
     });
 
-    const answer =
-      completion.choices[0]?.message?.content ??
-      "Sorry, I couldn't generate an answer.";
-
+    const answer = completion.choices[0]?.message?.content ?? "Sorry, I couldn't generate an answer.";
     return NextResponse.json({ answer });
   } catch (err) {
-    console.error("[ai-chat] Unhandled error:", err);
-    return NextResponse.json(
-      { answer: "Something went wrong. Please try again." },
-      { status: 500 }
-    );
+    console.error("[ai-chat] Error:", err);
+    return NextResponse.json({ answer: "Something went wrong. Please try again." }, { status: 500 });
   }
 }

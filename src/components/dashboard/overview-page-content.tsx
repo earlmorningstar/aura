@@ -9,7 +9,6 @@
  * - Provide staggered entrance animation for the entire dashboard
  * - Handle top-level error state
  *
- * Data flows down from useOverviewData → child sections.
  * Each child section also manages its own granular loading/error state.
  */
 
@@ -22,7 +21,6 @@ import { AISummaryCard } from "./ai-summary-card";
 import { AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { SkeletonDashboard, SkeletonChart } from "@/components/ui/loading-skeleton";
 import { GlassButton } from "@/components/ui/glass-button";
-// import { useOverviewData } from "@/hooks/use-overview-data";
 import { useContentPieces } from "@/hooks/use-content-pieces";
 import { useRevenue } from "@/hooks/use-revenue";
 import { useDateRangeStore } from "@/stores/date-range-store";
