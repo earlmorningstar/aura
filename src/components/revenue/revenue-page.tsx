@@ -24,6 +24,7 @@ import { downloadCSV } from "@/lib/export";
 import dynamic from "next/dynamic";
 import { SkeletonChart } from "@/components/ui/loading-skeleton";
 import { useCallback } from "react";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 const RevenueCharts = dynamic(
   () => import("./revenue-charts").then(mod => mod.RevenueCharts),
@@ -97,8 +98,13 @@ function PageMetrics() {
 /* ─── RevenuePage ────────────────────────────────────────────────── */
 
 export function RevenuePage() {
-  const { transactions, isLoading: txLoading } = useRevenue();
+  const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
+  const { transactions, isLoading: txLoading, addTransaction, refetch } = useRevenue();
   const [isExporting, setIsExporting] = React.useState(false);
+
+  React.useEffect(() => {
+    refetch();
+  }, [currentWorkspace, refetch]);
 
   const handleExport = useCallback(async () => {
     setIsExporting(true);

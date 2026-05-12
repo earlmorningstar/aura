@@ -27,6 +27,7 @@ import { useContentPieces } from "@/hooks/use-content-pieces";
 import { useRevenue } from "@/hooks/use-revenue";
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { differenceInDays } from "date-fns";
+import { useAudienceData } from "@/hooks/use-audience-data";
 
 const RevenueTrendChart = dynamic(
   () => import("@/components/charts/revenue-trend-chart").then(mod => mod.RevenueTrendChart),
@@ -130,16 +131,19 @@ function DashboardError({
 function QuickStatsRow() {
   const { transactions } = useRevenue();
   const { pieces: contentPieces } = useContentPieces();
+  const { data: audienceRecords = [] } = useAudienceData();
 
   const totalRevenue = transactions.reduce((sum, t) => sum + t.amount, 0);
   const contentCount = contentPieces.length;
   const avgRevenuePerPost = contentCount > 0 ? Math.round(totalRevenue / contentCount) : 0;
+  const activeSubscribers = audienceRecords.reduce((sum, r) => sum + r.followers, 0).toLocaleString();
+  const mrr = transactions.length > 0 ? (totalRevenue / transactions.length) * 30 : 0;
 
   const stats = [
-    { label: "Active subscribers", value: "—", unit: "" },            // placeholder until audience integration
+    { label: "Active subscribers", value: activeSubscribers, unit: "" },
     { label: "Content pieces live", value: String(contentCount), unit: "" },
     { label: "Avg. revenue per post", value: `$${avgRevenuePerPost.toLocaleString()}`, unit: "" },
-    { label: "Est. next payout", value: "$3,400", unit: "" },         // placeholder
+    { label: "Est. next payout", value: `$${mrr.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, unit: "" },
   ] as const;
 
   return (

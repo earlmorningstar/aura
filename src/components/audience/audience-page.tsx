@@ -331,12 +331,23 @@ export function AudiencePage() {
         {/* ── Section 2: Summary KPIs ──────────────────────────── */}
         <AnimatedItem variant="fadeUp">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-            {[
-              { title: "Total Followers", rawValue: ui.totalFollowers, prefix: "", suffix: "", change: "+8.4%", trend: "up" as const, period: "this month", icon: <Users size={15} />, accent: "cyan" as const },
-              { title: "New This Month", rawValue: ui.newThisMonth, prefix: "+", suffix: "", change: "+12%", trend: "up" as const, period: "followers", icon: <UserPlus size={15} />, accent: "default" as const },
-              { title: "Avg. Engagement", rawValue: ui.avgEngagement, prefix: "", suffix: "%", change: "−0.3%", trend: "down" as const, period: "rate", icon: <TrendingUp size={15} />, accent: "default" as const },
-              { title: "Avg. Views / Post", rawValue: ui.avgViews, prefix: "", suffix: "", change: "+15.2%", trend: "up" as const, period: "across platforms", icon: <Eye size={15} />, accent: "default" as const },
-            ].map((kpi, i) => (
+            {(() => {
+              const totalFollowers = ui.totalFollowers;
+              const newThisMonth = ui.newThisMonth;
+              const avgEngagement = ui.avgEngagement;
+              const avgViews = ui.avgViews;
+
+              const followerChange = ((newThisMonth / (totalFollowers - newThisMonth + 1)) * 100).toFixed(1);
+              const engagementChange = ((avgEngagement - 4.5) / 4.5 * 100).toFixed(1);
+              const viewsChange = ((avgViews - 20000) / 20000 * 100).toFixed(1);
+
+              return [
+                { title: "Total Followers", rawValue: totalFollowers, prefix: "", suffix: "", change: `+${followerChange}%`, trend: "up" as const, period: "this month", icon: <Users size={15} />, accent: "cyan" as const },
+                { title: "New This Month", rawValue: newThisMonth, prefix: "+", suffix: "", change: `+${followerChange}%`, trend: "up" as const, period: "followers", icon: <UserPlus size={15} />, accent: "default" as const },
+                { title: "Avg. Engagement", rawValue: avgEngagement, prefix: "", suffix: "%", change: `${Number(engagementChange) >= 0 ? "+" : ""}${engagementChange}%`, trend: (Number(engagementChange) >= 0 ? "up" : "down") as "up" | "down", period: "rate", icon: <TrendingUp size={15} />, accent: "default" as const },
+                { title: "Avg. Views / Post", rawValue: avgViews, prefix: "", suffix: "", change: `${Number(viewsChange) >= 0 ? "+" : ""}${viewsChange}%`, trend: (Number(viewsChange) >= 0 ? "up" : "down") as "up" | "down", period: "across platforms", icon: <Eye size={15} />, accent: "default" as const },
+              ];
+            })().map((kpi, i) => (
               <GlassKPI
                 key={kpi.title}
                 title={kpi.title}

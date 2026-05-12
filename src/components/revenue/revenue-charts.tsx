@@ -66,25 +66,6 @@ const SOURCE_PALETTE = [
   "var(--accent-pink)",
 ] as const;
 
-/* ─── Fallback data (shown when no transactions exist yet) ───────── */
-
-const FALLBACK_DAILY: DailyPoint[] = [
-  { name: "Apr 12", revenue: 820 },
-  { name: "Apr 13", revenue: 940 },
-  { name: "Apr 14", revenue: 1100 },
-  { name: "Apr 15", revenue: 980 },
-  { name: "Apr 16", revenue: 1350 },
-  { name: "Apr 17", revenue: 1420 },
-  { name: "Apr 18", revenue: 1180 },
-  { name: "Apr 19", revenue: 1560 },
-];
-
-const FALLBACK_SOURCES: SourcePoint[] = [
-  { name: "Stripe", value: 45, color: SOURCE_PALETTE[0] },
-  { name: "Gumroad", value: 32, color: SOURCE_PALETTE[1] },
-  { name: "Affiliate", value: 23, color: SOURCE_PALETTE[2] },
-];
-
 /* ─── Derivation helpers ─────────────────────────────────────────── */
 
 function deriveDailyRevenue(transactions: Transaction[]): DailyPoint[] {
@@ -521,14 +502,14 @@ export function RevenueCharts() {
     );
   }
 
-  // When no transactions yet, fall through to fallback data so the UI
-  // never shows empty charts on first load.
-  const hasData = transactions.length > 0;
+  // Derived data will naturally be empty if transactions is an empty array.
+  // The chart components will handle the empty state rendering automatically.
+  const dailyData = deriveDailyRevenue(transactions);
 
-  const dailyData = hasData ? deriveDailyRevenue(transactions) : FALLBACK_DAILY;
-  const sourceData = (hasData ? deriveSourceBreakdown(transactions) : FALLBACK_SOURCES).map(
-    (s, i) => ({ ...s, color: SOURCE_PALETTE[i % SOURCE_PALETTE.length] ?? SOURCE_PALETTE[0] }),
-  ) as SourcePoint[];
+  const sourceData = deriveSourceBreakdown(transactions).map((s, i) => ({
+    ...s,
+    color: SOURCE_PALETTE[i % SOURCE_PALETTE.length] ?? SOURCE_PALETTE[0],
+  })) as SourcePoint[];
 
   return (
     <AnimatedGroup stagger={0.1} delayChildren={0.05}>

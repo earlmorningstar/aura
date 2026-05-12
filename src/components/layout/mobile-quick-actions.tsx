@@ -20,6 +20,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useUIStore } from "@/stores/ui-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useWorkspaces } from "@/hooks/use-workspaces";
+import { WorkspaceActions } from "@/components/workspace/workspace-actions";
 import { useNewWorkspaceModalStore } from "@/stores/new-workspace-modal-store";
 import { GlassButton } from "@/components/ui/glass-button";
 import { supabase } from "@/lib/supabase/client";
@@ -133,19 +134,21 @@ export function MobileQuickActions() {
                   <p className="mb-2 text-xs font-semibold text-muted uppercase">Workspace</p>
                   <div className="flex flex-col gap-1.5">
                     {workspaces.map((ws) => (
-                      <button
-                        key={ws.slug}
-                        className={`w-full rounded-xl px-3 py-2 text-left text-sm font-medium ${ws.slug === currentWorkspace
-                          ? "bg-white/10 text-white"
-                          : "text-white/60 hover:bg-white/5"
-                          }`}
-                        onClick={() => {
-                          setWorkspace(ws.slug);
-                          setOpen(false);
-                        }}
-                      >
-                        {ws.name}
-                      </button>
+                      <div key={ws.slug} className="flex items-center justify-between">
+                        <button
+                          className={`w-full rounded-xl px-3 py-2 text-left text-sm font-medium ${ws.slug === currentWorkspace
+                            ? "bg-white/10 text-white"
+                            : "text-white/60 hover:bg-white/5"
+                            }`}
+                          onClick={() => {
+                            setWorkspace(ws.slug);
+                            setOpen(false);
+                          }}
+                        >
+                          {ws.name}
+                        </button>
+                        <WorkspaceActions workspace={ws} onClose={() => setOpen(false)} />
+                      </div>
                     ))}
                     <GlassButton
                       variant="ghost"

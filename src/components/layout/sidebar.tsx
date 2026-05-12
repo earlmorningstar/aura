@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useWorkspaces } from "@/hooks/use-workspaces";
+import { WorkspaceActions } from "@/components/workspace/workspace-actions";
 import { GlassButton } from "@/components/ui/glass-button";
 import { useNewWorkspaceModalStore } from "@/stores/new-workspace-modal-store";
 import { cn } from "@/lib/utils";
@@ -128,7 +129,7 @@ function WorkspaceSwitcher({
             transition={{ type: "spring", stiffness: 400, damping: 28 }}
           >
             {workspaces.map((ws) => (
-              <li key={ws.slug} role="option" aria-selected={ws.slug === current}>
+              <li key={ws.slug} role="option" aria-selected={ws.slug === current} className="flex items-center justify-between pr-2">
                 <motion.button
                   className="flex w-full items-center gap-2.5 px-3 py-2 text-sm"
                   style={{
@@ -152,6 +153,7 @@ function WorkspaceSwitcher({
                   </span>
                   {ws.name}
                 </motion.button>
+                <WorkspaceActions workspace={ws} onClose={() => setOpen(false)} />
               </li>
             ))}
           </motion.ul>
