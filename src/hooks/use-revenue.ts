@@ -22,6 +22,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createBrowserClient } from "@supabase/ssr";
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { format } from "date-fns";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import type { Transaction } from "@/stores/revenue-store";
 export type { Transaction } from "@/stores/revenue-store";
 
@@ -35,8 +36,9 @@ function getSupabase() {
 type NewTransaction = Omit<Transaction, "id">;
 
 export function useRevenue() {
-  const { startDate, endDate } = useDateRangeStore();
   const queryClient = useQueryClient();
+  const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
+  const { startDate, endDate } = useDateRangeStore();
 
   const { data: transactions = [], isLoading, isError, refetch } = useQuery<Transaction[]>({
     queryKey: ["transactions", startDate.toISOString(), endDate.toISOString()],
@@ -45,9 +47,11 @@ export function useRevenue() {
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
+        .eq("workspace_id", currentWorkspace)
         .gte("date", format(startDate, "yyyy-MM-dd"))
         .lte("date", format(endDate, "yyyy-MM-dd"))
         .order("date", { ascending: false });
+
       if (error) throw new Error(error.message);
       return (data as Transaction[]) ?? [];
     },
@@ -65,7 +69,7 @@ export function useRevenue() {
         .insert({
           ...newTx,
           user_id: user.id,
-          workspace_id: "personal",
+          workspace_id: currentWorkspace,
         })
         .select("*")
         .single();
@@ -74,7 +78,9 @@ export function useRevenue() {
       return data as Transaction;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      void queryClient.invalidateQueries({ queryKey: ["transactions", currentWorkspace] });
+      void queryClient.invalidateQueries({ queryKey: ["revenue-chart-data"] });
+      void queryClient.invalidateQueries({ queryKey: ["overview"] });
     },
   });
 
@@ -85,7 +91,9 @@ export function useRevenue() {
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      void queryClient.invalidateQueries({ queryKey: ["transactions", currentWorkspace] });
+      void queryClient.invalidateQueries({ queryKey: ["revenue-chart-data"] });
+      void queryClient.invalidateQueries({ queryKey: ["overview"] });
     },
   });
 

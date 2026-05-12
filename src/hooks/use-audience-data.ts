@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { createBrowserClient } from "@supabase/ssr";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 function getSupabase() {
   return createBrowserClient(
@@ -21,13 +22,16 @@ export interface AudienceRecord {
 }
 
 export function useAudienceData() {
+  const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
+
   return useQuery<AudienceRecord[]>({
-    queryKey: ["audience-data"],
+    queryKey: ["audience-data", currentWorkspace],
     queryFn: async () => {
       const supabase = getSupabase();
       const { data, error } = await supabase
         .from("audience_data")
         .select("*")
+        .eq("workspace_id", currentWorkspace)
         .order("recorded_date", { ascending: false });
 
       if (error) throw new Error(error.message);

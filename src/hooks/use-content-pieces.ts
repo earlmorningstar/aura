@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createBrowserClient } from "@supabase/ssr";
 import type { ContentPiece } from "@/components/content/content-performance-cards";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 function getSupabase() {
     return createBrowserClient(
@@ -30,14 +31,16 @@ function toDbPiece(piece: Omit<ContentPiece, "id">) {
 
 export function useContentPieces() {
     const queryClient = useQueryClient();
+    const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
 
     const { data: pieces = [], isLoading } = useQuery<ContentPiece[]>({
-        queryKey: ["content-pieces"],
+        queryKey: ["content-pieces", currentWorkspace],
         queryFn: async () => {
             const supabase = getSupabase();
             const { data, error } = await supabase
                 .from("content_pieces")
                 .select("*")
+                .eq("workspace_id", currentWorkspace)
                 .order("published_at", { ascending: false });
 
             if (error) throw new Error(error.message);
@@ -70,7 +73,7 @@ export function useContentPieces() {
             const insertData = {
                 ...toDbPiece(piece),
                 user_id: user.id,
-                workspace_id: "personal",
+                workspace_id: currentWorkspace,
             };
 
             const { data, error } = await supabase
@@ -83,7 +86,7 @@ export function useContentPieces() {
             return data;
         },
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ["content-pieces"] });
+            void queryClient.invalidateQueries({ queryKey: ["content-pieces", currentWorkspace] });
         },
     });
 

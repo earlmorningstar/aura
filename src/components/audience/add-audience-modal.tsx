@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle2, AlertCircle } from "lucide-react";
 import { GlassButton } from "@/components/ui/glass-button";
 import { supabase } from "@/lib/supabase/client";
+import { useWorkspaceStore } from "@/stores/workspace-store";
+
 
 interface Props {
     open: boolean;
@@ -13,6 +15,7 @@ interface Props {
 }
 
 export function AddAudienceModal({ open, onClose, onComplete }: Props) {
+    const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
     const [form, setForm] = useState({
         platform: "YouTube",
         followers: "",
@@ -45,7 +48,7 @@ export function AddAudienceModal({ open, onClose, onComplete }: Props) {
         try {
             const { error } = await supabase.from("audience_data").insert({
                 user_id: user.id,
-                workspace_id: "personal",
+                workspace_id: currentWorkspace,
                 platform,
                 followers: parseInt(form.followers),
                 new_followers: parseInt(form.new_followers || "0"),

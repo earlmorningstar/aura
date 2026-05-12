@@ -103,7 +103,10 @@ export function RevenuePage() {
   const handleExport = useCallback(async () => {
     setIsExporting(true);
     try {
-      const filename = `revenue-${new Date().toISOString().slice(0, 10)}.csv`;
+      const now = new Date();
+      const date = now.toISOString().slice(0, 10);
+      const time = now.toTimeString().slice(0, 5).replace(":", "-");
+      const filename = `revenue-${date}-${time}.csv`;
       // Cast transactions to satisfy the strict Record constraint
       downloadCSV(transactions as Record<string, any>[], filename);
     } finally {

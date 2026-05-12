@@ -10,6 +10,7 @@ import { differenceInDays, format } from "date-fns";
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { useRevenue } from "@/hooks/use-revenue";
 import { useAudienceData, type AudienceRecord } from "@/hooks/use-audience-data";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface KPI {
   title: string;
@@ -195,12 +196,13 @@ function deriveOverviewData(
 
 export function useOverviewData() {
   const { startDate, endDate } = useDateRangeStore();
+  const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
   const { transactions = [] } = useRevenue();
   const { data: audienceRecords = [] } = useAudienceData();
   const days = Math.max(differenceInDays(endDate, startDate), 1);
 
   return useQuery<OverviewData>({
-    queryKey: ["overview", startDate.toISOString(), endDate.toISOString(), transactions.length, audienceRecords.length],
+    queryKey: ["overview", currentWorkspace, startDate.toISOString(), endDate.toISOString(), transactions.length, audienceRecords.length],
     queryFn: async () => {
       const filteredTransactions = transactions.filter((tx: Transaction) => {
         if (!tx.date) return false;

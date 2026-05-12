@@ -344,7 +344,7 @@ function SuccessToast({ show, onDone }: { show: boolean; onDone: () => void }) {
   );
 }
 
-/* ─── Sort / filter bar (unchanged from original) ────────────────── */
+/* ─── Sort / filter bar ────────────────── */
 
 type SortOption = "revenue" | "engagement" | "views" | "recent";
 type PlatformFilter = "all" | "YouTube" | "Newsletter" | "Twitter/X" | "Blog";
@@ -505,23 +505,6 @@ function ContentFilterBar({
 
 /* ─── Publishing cadence heatmap ─────────────────────── */
 
-// const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-// const WEEKS = 12;
-
-// function getPostingIntensity(week: number, day: number): number {
-//   const seed = (week * 7 + day) * 2654435761;
-//   const val = (seed ^ (seed >> 16)) % 5;
-//   if (day >= 5) return Math.min(val, 1);
-//   return val as 0 | 1 | 2 | 3 | 4;
-// }
-
-// const INTENSITY_STYLES = [
-//   "rgba(var(--glass-bg-rgb) / 0.06)",
-//   "rgba(var(--accent-cyan-rgb) / 0.12)",
-//   "rgba(var(--accent-cyan-rgb) / 0.28)",
-//   "rgba(var(--accent-cyan-rgb) / 0.52)",
-//   "rgba(var(--accent-cyan-rgb) / 0.80)",
-// ];
 
 function RealPublishingHeatmap() {
   const { pieces } = useContentPieces();
