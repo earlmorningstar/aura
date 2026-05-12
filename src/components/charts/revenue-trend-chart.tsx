@@ -176,13 +176,15 @@ function ChartEmpty() {
 /* ─── RevenueTrendChart ──────────────────────────────────────────── */
 
 export function RevenueTrendChart() {
-  const { data, isLoading } = useOverviewData();
+  const overview = useOverviewData();
 
-  if (isLoading) return <SkeletonChart heightClass="h-[260px]" />;
+  if (!overview) {
+    return <SkeletonChart heightClass="h-[260px]" />;
+  }
 
-  const trendData = data?.revenueTrend ?? FALLBACK_TREND;
-  const totalRevenue = data?.totalRevenue ?? 24892;
-  const trendDelta = data?.trendDelta ?? "+18.4%";
+  const trendData = overview.revenueTrend ?? [];
+  const totalRevenue = overview.totalRevenue ?? 0;
+  const trendDelta = overview.trendDelta ?? "+0%";
   const isDeltaPositive = !trendDelta.startsWith("−") && !trendDelta.startsWith("-");
 
   return (

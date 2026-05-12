@@ -5,7 +5,7 @@
  * from actual revenue transactions + selected date range.
  */
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { differenceInDays, format } from "date-fns";
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { useRevenue } from "@/hooks/use-revenue";
@@ -50,19 +50,12 @@ function deriveOverviewData(
   audienceRecords: AudienceRecord[],
 ): OverviewData {
   const safeTransactions = transactions ?? [];
-
-  // Total revenue
   const totalRevenue = safeTransactions.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-
-  // MRR
   const mrr = safeTransactions.length > 0 ? (totalRevenue / safeTransactions.length) * 30 : 0;
-
-  // Top content revenue
   const topContentRevenue = safeTransactions.length > 0
     ? Math.max(...safeTransactions.map((tx) => Number(tx.amount || 0)))
     : 0;
 
-  // Trend building (fill all days)
   const filledTrend = new Map<string, number>();
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -80,7 +73,6 @@ function deriveOverviewData(
     .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
     .map(([date, value]) => ({ date, value }));
 
-  // Trend delta
   const midpoint = Math.floor(revenueTrend.length / 2);
   const firstHalf = revenueTrend.slice(0, midpoint).reduce((sum, item) => sum + item.value, 0);
   const secondHalf = revenueTrend.slice(midpoint).reduce((sum, item) => sum + item.value, 0);
@@ -93,7 +85,6 @@ function deriveOverviewData(
     else if (delta < 0) trendDirection = "down";
   }
 
-  // Build KPIs
   const kpis: KPI[] = [
     {
       title: "Total Revenue",
@@ -169,7 +160,6 @@ function deriveOverviewData(
     icon: null,
   });
 
-  // AI Summary / actions
   let aiSummary = "Revenue activity is stable across the selected period.";
   if (trendDirection === "up") aiSummary = "Revenue is trending upward. Recent transactions are outperforming earlier activity.";
   if (trendDirection === "down") aiSummary = "Revenue slowed during the latter half of the selected period.";
@@ -201,25 +191,18 @@ export function useOverviewData() {
   const { data: audienceRecords = [] } = useAudienceData();
   const days = Math.max(differenceInDays(endDate, startDate), 1);
 
-  return useQuery<OverviewData>({
-    queryKey: ["overview", currentWorkspace, startDate.toISOString(), endDate.toISOString(), transactions.length, audienceRecords.length],
-    queryFn: async () => {
-      const filteredTransactions = transactions.filter((tx: Transaction) => {
+  const filteredTransactions = useMemo(
+    () =>
+      transactions.filter((tx) => {
         if (!tx.date) return false;
         const txDate = new Date(tx.date);
         return txDate >= startDate && txDate <= endDate;
-      });
-      return deriveOverviewData(filteredTransactions, days, startDate, endDate, audienceRecords);
-    },
-    initialData: () => {
-      const filteredTransactions = transactions.filter((tx: Transaction) => {
-        if (!tx.date) return false;
-        const txDate = new Date(tx.date);
-        return txDate >= startDate && txDate <= endDate;
-      });
-      return deriveOverviewData(filteredTransactions, days, startDate, endDate, audienceRecords);
-    },
-    staleTime: 30 * 1000,
-    placeholderData: (previousData) => previousData,
-  });
+      }),
+    [transactions, startDate, endDate],
+  );
+
+  return useMemo(
+    () => deriveOverviewData(filteredTransactions, days, startDate, endDate, audienceRecords),
+    [filteredTransactions, days, startDate, endDate, audienceRecords],
+  );
 }

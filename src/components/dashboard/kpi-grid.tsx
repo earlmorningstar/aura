@@ -41,7 +41,7 @@ interface KPIConfig {
   icon: React.ReactNode;
 }
 
-/* ─── Static fallback config ─────────────────────────────────────── */
+/* ─── Static fallback (used only if overview is still undefined) ──── */
 
 const FALLBACK_KPIS: KPIConfig[] = [
   {
@@ -115,12 +115,11 @@ const FALLBACK_KPIS: KPIConfig[] = [
 /* ─── KPIGrid ────────────────────────────────────────────────────── */
 
 export function KPIGrid() {
-  const { data, isLoading } = useOverviewData();
+  const overview = useOverviewData();
 
-  // Loading skeleton – consistent grid breakpoints
-  if (isLoading) {
+  if (!overview) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <SkeletonKPI key={i} />
         ))}
@@ -128,18 +127,17 @@ export function KPIGrid() {
     );
   }
 
-  const kpis: KPIConfig[] =
-    (data?.kpis as KPIConfig[] | undefined) ?? FALLBACK_KPIS;
+  const kpis: KPIConfig[] = overview.kpis ?? FALLBACK_KPIS;
 
   return (
     <AnimatedGroup
       stagger={0.06}
       delayChildren={0.05}
-      className="grid grid-cols-2 lg:grid-cols-3 gap-2"
+      className="grid grid-cols-2 gap-4 lg:grid-cols-3"
     >
       {kpis.map((kpi, i) => (
         <AnimatedItem key={kpi.title} variant="fadeUp" distance={12}>
-          <div className="h-full scale-[0.88] md:scale-100 origin-top-left">
+          <div className="h-full">
             <GlassKPI
               title={kpi.title}
               value={kpi.value}

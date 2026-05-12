@@ -22,7 +22,7 @@ import { AISummaryCard } from "./ai-summary-card";
 import { AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { SkeletonDashboard, SkeletonChart } from "@/components/ui/loading-skeleton";
 import { GlassButton } from "@/components/ui/glass-button";
-import { useOverviewData } from "@/hooks/use-overview-data";
+// import { useOverviewData } from "@/hooks/use-overview-data";
 import { useContentPieces } from "@/hooks/use-content-pieces";
 import { useRevenue } from "@/hooks/use-revenue";
 import { useDateRangeStore } from "@/stores/date-range-store";
@@ -192,8 +192,10 @@ function QuickStatsRow() {
 export function OverviewPageContent() {
   const { startDate, endDate } = useDateRangeStore();
   const days = differenceInDays(endDate, startDate);
-  const { isLoading, isError, refetch } = useOverviewData();
-  const { pieces: contentPieces } = useContentPieces();
+  const isLoading = false;
+  const isError = false;
+  const refetch = () => { };
+  // const { pieces: contentPieces } = useContentPieces();
 
   // Full-page skeleton while initial data loads
   if (isLoading) {

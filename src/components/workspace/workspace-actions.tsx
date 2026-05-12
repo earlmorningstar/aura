@@ -30,12 +30,24 @@ export function WorkspaceActions({ workspace, onClose }: Props) {
     };
 
     const handleRename = async () => {
-        if (!newName.trim() || newName === workspace.name) return;
-        const newSlug = newName.toLowerCase().replace(/\s+/g, "-");
-        await supabase
+        const trimmed = newName.trim();
+        if (!trimmed || trimmed === workspace.name) return;
+        const newSlug = trimmed
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "");
+
+        const { error } = await supabase
             .from("workspaces")
-            .update({ name: newName.trim(), slug: newSlug })
+            .update({ name: trimmed, slug: newSlug })
             .eq("slug", workspace.slug);
+
+        if (error) {
+            console.error("Rename error:", error.message);
+            alert("Could not rename: " + error.message);
+            return;
+        }
+
         await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
         if (currentWorkspace === workspace.slug) {
             setWorkspace(newSlug);

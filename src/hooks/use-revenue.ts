@@ -55,7 +55,7 @@ export function useRevenue() {
       if (error) throw new Error(error.message);
       return (data as Transaction[]) ?? [];
     },
-    staleTime: 60 * 1000,
+    staleTime: 0,
   });
 
   const addMutation = useMutation({
