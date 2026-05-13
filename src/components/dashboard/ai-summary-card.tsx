@@ -227,9 +227,10 @@ function AISummaryFullError({ onRetry }: { onRetry: () => void }) {
 function Timestamp({ isoString }: { isoString?: string }) {
   if (!isoString) return null;
   const date = new Date(isoString);
-  const formatted = date.toLocaleTimeString([], {
+  const formatted = date.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: true,
   });
   return (
     <motion.div

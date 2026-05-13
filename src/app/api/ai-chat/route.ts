@@ -78,8 +78,19 @@ User data:
 
     const answer = completion.choices[0]?.message?.content ?? "Sorry, I couldn't generate an answer.";
     return NextResponse.json({ answer });
-  } catch (err) {
-    console.error("[ai-chat] Error:", err);
-    return NextResponse.json({ answer: "Something went wrong. Please try again." }, { status: 500 });
+  } catch (err: any) {
+    console.error("[ai-chat] Error:", err.message);
+
+    // Feedback if quota exceeded
+    if (err?.code === "insufficient_quota" || err?.status === 429) {
+      return NextResponse.json({
+        answer: "I'm currently unavailable because the AI quota has been reached. This is normal during testing — you'll need to add billing to your OpenAI account or wait for the free credits to reset. In the meantime, you can still use all other features of Aura.",
+      });
+    }
+
+    return NextResponse.json(
+      { answer: "Something went wrong. Please try again." },
+      { status: 500 }
+    );
   }
 }

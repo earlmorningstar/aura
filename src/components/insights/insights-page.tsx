@@ -60,31 +60,31 @@ type CategoryFilter = "all" | InsightCategory;
 const FALLBACK_INSIGHTS: InsightItem[] = [
   // … same items as before …
   {
-    id:       "fallback-1",
+    id: "fallback-1",
     category: "revenue",
     priority: "high",
-    title:    "Your top video generates 38% of total revenue",
-    body:     "The tutorial video on monetisation strategies is your strongest revenue driver this period. Publishing a follow-up in the next 48 hours would capitalise on peak audience interest and could increase this month's revenue by 12–18%.",
-    actions:  ["Schedule follow-up", "Boost promotion"],
-    impact:   "+12–18% revenue potential",
+    title: "Your top video generates 38% of total revenue",
+    body: "The tutorial video on monetisation strategies is your strongest revenue driver this period. Publishing a follow-up in the next 48 hours would capitalise on peak audience interest and could increase this month's revenue by 12–18%.",
+    actions: ["Schedule follow-up", "Boost promotion"],
+    impact: "+12–18% revenue potential",
   },
   {
-    id:       "fallback-2",
+    id: "fallback-2",
     category: "content",
     priority: "high",
-    title:    "Long-form educational content outperforms short clips 4:1",
-    body:     "Videos over 12 minutes are generating 4× more revenue per view. Consider shifting at least 60% of your content calendar to long-form.",
-    actions:  ["Adjust content calendar"],
-    impact:   "4× higher revenue per view",
+    title: "Long-form educational content outperforms short clips 4:1",
+    body: "Videos over 12 minutes are generating 4× more revenue per view. Consider shifting at least 60% of your content calendar to long-form.",
+    actions: ["Adjust content calendar"],
+    impact: "4× higher revenue per view",
   },
   {
-    id:       "fallback-3",
+    id: "fallback-3",
     category: "audience",
     priority: "medium",
-    title:    "Newsletter engagement at 42% — prime for paid tier",
-    body:     "Your newsletter open rate significantly exceeds the industry average. A 5% conversion at $10/month would add $1,480 MRR.",
-    actions:  ["Create paid tier", "Set up Stripe product"],
-    impact:   "+$1,480 MRR at 5% conversion",
+    title: "Newsletter engagement at 42% — prime for paid tier",
+    body: "Your newsletter open rate significantly exceeds the industry average. A 5% conversion at $10/month would add $1,480 MRR.",
+    actions: ["Create paid tier", "Set up Stripe product"],
+    impact: "+$1,480 MRR at 5% conversion",
   },
 ];
 
@@ -96,11 +96,11 @@ const CATEGORY_CONFIG: Record<InsightCategory, {
   color: string;
   rgb: string;
 }> = {
-  revenue:  { label: "Revenue",  icon: TrendingUp, color: "var(--accent-cyan)",    rgb: "var(--accent-cyan-rgb)" },
-  content:  { label: "Content",  icon: FileText,   color: "var(--accent-purple)",  rgb: "var(--accent-purple-rgb)" },
-  audience: { label: "Audience", icon: Users,      color: "var(--status-success)", rgb: "var(--status-success-rgb)" },
-  growth:   { label: "Growth",   icon: Zap,        color: "var(--accent-amber)",   rgb: "var(--accent-amber-rgb)" },
-  general:  { label: "General",  icon: Lightbulb,  color: "var(--text-tertiary)",  rgb: "var(--glass-bg-rgb)" },
+  revenue: { label: "Revenue", icon: TrendingUp, color: "var(--accent-cyan)", rgb: "var(--accent-cyan-rgb)" },
+  content: { label: "Content", icon: FileText, color: "var(--accent-purple)", rgb: "var(--accent-purple-rgb)" },
+  audience: { label: "Audience", icon: Users, color: "var(--status-success)", rgb: "var(--status-success-rgb)" },
+  growth: { label: "Growth", icon: Zap, color: "var(--accent-amber)", rgb: "var(--accent-amber-rgb)" },
+  general: { label: "General", icon: Lightbulb, color: "var(--text-tertiary)", rgb: "var(--glass-bg-rgb)" },
 };
 
 /* ─── Priority config (unchanged) ────────────────────────────────── */
@@ -113,25 +113,25 @@ const PRIORITY_CONFIG: Record<InsightPriority, {
   dot: string;
 }> = {
   high: {
-    label:  "High priority",
-    color:  "var(--status-error)",
-    bg:     "rgba(var(--status-error-rgb) / 0.1)",
+    label: "High priority",
+    color: "var(--status-error)",
+    bg: "rgba(var(--status-error-rgb) / 0.1)",
     border: "rgba(var(--status-error-rgb) / 0.2)",
-    dot:    "var(--status-error)",
+    dot: "var(--status-error)",
   },
   medium: {
-    label:  "Medium priority",
-    color:  "var(--status-warning)",
-    bg:     "rgba(var(--status-warning-rgb) / 0.1)",
+    label: "Medium priority",
+    color: "var(--status-warning)",
+    bg: "rgba(var(--status-warning-rgb) / 0.1)",
     border: "rgba(var(--status-warning-rgb) / 0.2)",
-    dot:    "var(--status-warning)",
+    dot: "var(--status-warning)",
   },
   low: {
-    label:  "Low priority",
-    color:  "var(--text-muted)",
-    bg:     "rgba(var(--glass-bg-rgb) / 0.08)",
+    label: "Low priority",
+    color: "var(--text-muted)",
+    bg: "rgba(var(--glass-bg-rgb) / 0.08)",
     border: "rgba(var(--glass-border-rgb) / 0.12)",
-    dot:    "var(--text-muted)",
+    dot: "var(--text-muted)",
   },
 };
 
@@ -225,8 +225,8 @@ interface InsightCardProps {
 
 function InsightCard({ insight, index }: InsightCardProps) {
   const [expanded, setExpanded] = React.useState(false);
-  const catCfg  = CATEGORY_CONFIG[insight.category];
-  const priCfg  = PRIORITY_CONFIG[insight.priority];
+  const catCfg = CATEGORY_CONFIG[insight.category];
+  const priCfg = PRIORITY_CONFIG[insight.priority];
   const CatIcon = catCfg.icon;
 
   return (
@@ -351,13 +351,13 @@ interface InsightSummaryProps {
 }
 
 function InsightSummary({ insights }: InsightSummaryProps) {
-  const highCount   = insights.filter((i) => i.priority === "high").length;
+  const highCount = insights.filter((i) => i.priority === "high").length;
   const totalImpact = insights.filter((i) => i.impact).length;
 
   const stats = [
-    { label: "Total insights",     value: String(insights.length) },
-    { label: "High priority",      value: String(highCount),       color: "var(--status-error)" },
-    { label: "With impact data",   value: String(totalImpact) },
+    { label: "Total insights", value: String(insights.length) },
+    { label: "High priority", value: String(highCount), color: "var(--status-error)" },
+    { label: "With impact data", value: String(totalImpact) },
     { label: "Categories covered", value: String(new Set(insights.map((i) => i.category)).size) },
   ];
 
@@ -494,6 +494,14 @@ export function InsightsPage() {
   const handleRefresh = React.useCallback(async () => {
     setIsRefreshing(true);
     try {
+      // Calling POST to generate new insights
+      await fetch("/api/ai-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ context: "weekly_overview" }),
+        credentials: "include",
+      });
+      //Refetch via GET to get the cached result
       await refetch();
     } finally {
       setTimeout(() => setIsRefreshing(false), 600);
