@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { eachDayOfInterval, subWeeks, format, getDay } from "date-fns";
 import { useContentPieces } from "@/hooks/use-content-pieces";
 import { useState } from "react";
+import { Toast } from "@/components/ui/toast";
 
 /* ─── Minimal “Add Content” Modal ────────────────────────────────── */
 
@@ -760,8 +761,9 @@ export function ContentPage() {
       />
 
       {/* ── Success toast ────────────────────────────────────── */}
-      <SuccessToast
+      <Toast
         show={showToast}
+        message="Content added successfully"
         onDone={() => setShowToast(false)}
       />
     </AnimatedPage>

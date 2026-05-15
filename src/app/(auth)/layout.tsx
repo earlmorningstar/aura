@@ -3,7 +3,9 @@ import { SkeletonDashboard } from "@/components/ui/loading-skeleton";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { ClientPanels } from './client-panels'; 
+import { ClientPanels } from './client-panels';
+import { MobileDashboardHeader } from "@/components/layout/mobile-dashboard-header";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -31,9 +33,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             }}
           />
           <Topbar />
+          <MobileDashboardHeader />
           <main className="w-full flex-1 pb-24 lg:pb-0 px-4 pt-6 lg:px-0 lg:pt-0">
             <Suspense fallback={<SkeletonDashboard kpiCount={6} />}>
-              {children}
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
             </Suspense>
           </main>
         </div>

@@ -16,12 +16,13 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, ExternalLink, TrendingUp, DollarSign, Eye, Heart } from "lucide-react";
+import { ExternalLink, TrendingUp, DollarSign, Eye, ReceiptText } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { SkeletonCard } from "@/components/ui/loading-skeleton";
 import { Sparkline } from "@/components/common/sparkline";
 import { AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 
@@ -284,38 +285,6 @@ function ContentCard({ piece, rank }: ContentCardProps) {
   );
 }
 
-/* ─── Empty state ────────────────────────────────────────────────── */
-
-function ContentEmpty() {
-  return (
-    <motion.div
-      className="col-span-full flex flex-col items-center justify-center gap-4 py-20 text-center"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 280, damping: 26 }}
-    >
-      <div
-        className="flex h-14 w-14 items-center justify-center rounded-2xl"
-        style={{
-          background: "rgba(var(--glass-bg-rgb) / 0.06)",
-          border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
-          color: "var(--text-muted)",
-        }}
-      >
-        <FileText size={24} />
-      </div>
-      <div>
-        <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-          No content yet
-        </p>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Publish content to start tracking performance.
-        </p>
-      </div>
-    </motion.div>
-  );
-}
-
 /* ─── ContentPerformanceCards ────────────────────────────────────── */
 
 export interface ContentPerformanceCardsProps {
@@ -354,7 +323,15 @@ export function ContentPerformanceCards({
     >
       <AnimatePresence>
         {content.length === 0 ? (
-          <ContentEmpty />
+          <EmptyState
+            icon={<ReceiptText size={24} />}
+            title="No transactions yet"
+            description="Add your first transaction to start tracking revenue."
+            actionLabel="Add Transaction"
+            onAction={() => {
+              document.querySelector("#add-transaction-form")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          />
         ) : (
           content.map((piece, i) => (
             <AnimatedItem key={piece.id} variant="fadeUp" distance={12} className="h-full">

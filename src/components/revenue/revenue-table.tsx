@@ -10,38 +10,36 @@
  * - All magic colour values removed
  */
 
-import * as React from "react";
-import { motion } from "framer-motion";
 import { ReceiptText, RefreshCw } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { SkeletonTable } from "@/components/ui/loading-skeleton";
 import { useRevenue } from "@/hooks/use-revenue";
-import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
 
 /* ─── Source badge ───────────────────────────────────────────────── */
 
 const SOURCE_STYLES: Record<string, { bg: string; border: string; color: string }> = {
   Stripe: {
-    bg:     "rgba(var(--accent-cyan-rgb) / 0.08)",
+    bg: "rgba(var(--accent-cyan-rgb) / 0.08)",
     border: "rgba(var(--accent-cyan-rgb) / 0.18)",
-    color:  "var(--accent-cyan)",
+    color: "var(--accent-cyan)",
   },
   Gumroad: {
-    bg:     "rgba(var(--accent-purple-rgb) / 0.08)",
+    bg: "rgba(var(--accent-purple-rgb) / 0.08)",
     border: "rgba(var(--accent-purple-rgb) / 0.18)",
-    color:  "var(--accent-purple)",
+    color: "var(--accent-purple)",
   },
   Affiliate: {
-    bg:     "rgba(var(--status-success-rgb) / 0.08)",
+    bg: "rgba(var(--status-success-rgb) / 0.08)",
     border: "rgba(var(--status-success-rgb) / 0.18)",
-    color:  "var(--status-success)",
+    color: "var(--status-success)",
   },
 };
 
 const DEFAULT_SOURCE_STYLE = {
-  bg:     "rgba(var(--glass-bg-rgb) / 0.08)",
+  bg: "rgba(var(--glass-bg-rgb) / 0.08)",
   border: "rgba(var(--glass-border-rgb) / 0.12)",
-  color:  "var(--text-tertiary)",
+  color: "var(--text-tertiary)",
 };
 
 function SourceBadge({ source }: { source: string }) {
@@ -95,42 +93,11 @@ function DateCell({ value }: { value: string }) {
   );
 }
 
-/* ─── Empty state ────────────────────────────────────────────────── */
-
-function TableEmpty() {
-  return (
-    <motion.div
-      className="flex flex-col items-center justify-center gap-4 py-16 text-center"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 280, damping: 26 }}
-    >
-      <div
-        className="flex h-12 w-12 items-center justify-center rounded-2xl"
-        style={{
-          background: "rgba(var(--glass-bg-rgb) / 0.06)",
-          border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
-          color: "var(--text-muted)",
-        }}
-      >
-        <ReceiptText size={20} />
-      </div>
-      <div>
-        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-          No transactions yet
-        </p>
-        <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-          Add your first transaction using the form.
-        </p>
-      </div>
-    </motion.div>
-  );
-}
-
 /* ─── Column definitions ─────────────────────────────────────────── */
 
 // These conform to the DataTable column spec from data-table.tsx (Batch 7).
-// Using inline `render` functions for custom cell formatting.
+//  Using inline `render` functions for custom cell formatting.
+
 const COLUMNS = [
   {
     key: "date",
@@ -187,9 +154,15 @@ export function RevenueTable() {
       </div>
 
       {transactions.length === 0 ? (
-        <div className="glass rounded-2xl" style={{ minHeight: "240px" }}>
-          <TableEmpty />
-        </div>
+        <EmptyState
+          icon={<ReceiptText size={24} />}
+          title="No transactions yet"
+          description="Add your first transaction to start tracking revenue."
+          actionLabel="Add Transaction"
+          onAction={() => {
+            document.querySelector("#add-transaction-form")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
       ) : (
         <DataTable
           data={transactions}

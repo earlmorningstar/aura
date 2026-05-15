@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Features · Aura",

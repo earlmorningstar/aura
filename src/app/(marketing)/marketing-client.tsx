@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * Marketing client components — interactive portions of the landing page.
- *
- * Separated from page.tsx so the page shell stays a Server Component
- * while we get Framer Motion entrance animations here.
- */
-
 import * as React from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";

@@ -39,6 +39,7 @@ import type { AudienceRecord } from "@/hooks/use-audience-data";
 import { GlassButton } from "../ui/glass-button";
 import { useState } from "react";
 import { AddAudienceModal } from "./add-audience-modal";
+import { EmptyState } from "../ui/empty-state";
 
 const AudienceGrowthChart = dynamic(
   () => import("./audience-growth-chart").then(mod => mod.AudienceGrowthChart),
@@ -432,9 +433,10 @@ export function AudiencePage() {
                   <TopContentRow key={item.title} {...item} index={i} />
                 ))
               ) : (
-                <p className="py-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-                  No data yet. Add your first audience records.
-                </p>
+                <EmptyState
+                  title="No content data yet"
+                  description="Add audience records to see top-performing content."
+                />
               )}
             </div>
           </GlassCard>
