@@ -46,7 +46,7 @@ function PageHeader() {
         <div className="flex items-start justify-between">
           <div>
             <h1
-              className="font-display font-bold leading-[1.1]"
+              className="hidden lg:block font-display font-bold leading-[1.1]"
               style={{
                 fontSize: "clamp(1.30rem, 3.5vw, 2.5rem)",
                 letterSpacing: "var(--tracking-tight)",
@@ -66,7 +66,7 @@ function PageHeader() {
               </motion.span>
             </h1>
             <p
-              className="mt-2 text-base"
+              className="mt-2 text-base lg:text-base"
               style={{ color: "var(--text-secondary)" }}
             >
               Here’s what’s happening with your creator business today.

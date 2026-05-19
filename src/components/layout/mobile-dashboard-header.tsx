@@ -45,9 +45,9 @@ export function MobileDashboardHeader() {
             />
 
             <div
-                className="flex items-center justify-between px-4 py-3"
+                className="flex items-center justify-between px-4 py-4"
                 style={{
-                    background: "rgba(var(--glass-bg-rgb) / 0.85)",
+                    background: "rgba(7,7,15,0.92)",
                     backdropFilter: "blur(20px) saturate(180%)",
                     WebkitBackdropFilter: "blur(20px) saturate(180%)",
                     borderBottom: "1px solid rgba(var(--glass-border-rgb) / 0.08)",

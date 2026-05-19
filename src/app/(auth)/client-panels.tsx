@@ -4,6 +4,7 @@ import { AIChatPanel } from "@/components/ai/ai-chat-panel";
 import { MobileQuickActions } from "@/components/layout/mobile-quick-actions";
 import { NewWorkspaceModal } from "@/components/workspace/new-workspace-modal";
 import { useUIStore } from "@/stores/ui-store";
+import { OfflineBanner } from "@/components/layout/offline-banner";
 
 export function ClientPanels() {
   const isAIOpen = useUIStore((s) => s.isAIOpen);
@@ -13,7 +14,8 @@ export function ClientPanels() {
     <>
       <AIChatPanel isOpen={isAIOpen} onClose={() => setAIOpen(false)} />
       <MobileQuickActions />
-            <NewWorkspaceModal />
+      <NewWorkspaceModal />
+      <OfflineBanner />
     </>
   );
 }

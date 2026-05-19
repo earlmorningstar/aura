@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ConfirmDialog } from "../ui/confirm-dialog";
 
 interface Props {
     workspace: { slug: string; name: string };
@@ -15,19 +16,11 @@ interface Props {
 export function WorkspaceActions({ workspace, onClose }: Props) {
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const [newName, setNewName] = useState(workspace.name);
     const queryClient = useQueryClient();
     const { currentWorkspace, setWorkspace } = useWorkspaceStore();
 
-    const handleDelete = async () => {
-        if (!confirm(`Delete "${workspace.name}"? This cannot be undone.`)) return;
-        await supabase.from("workspaces").delete().eq("slug", workspace.slug);
-        await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-        if (currentWorkspace === workspace.slug) {
-            setWorkspace("personal"); // fallback to personal
-        }
-        onClose();
-    };
 
     const handleRename = async () => {
         const trimmed = newName.trim();
@@ -82,7 +75,7 @@ export function WorkspaceActions({ workspace, onClose }: Props) {
                                 </button>
                                 <button
                                     className="w-full text-left px-3 py-2 text-sm hover:bg-red-500/10 rounded-lg flex items-center gap-2 text-red-400"
-                                    onClick={handleDelete}
+                                    onClick={() => setConfirmDelete(true)}
                                 >
                                     <Trash2 size={14} /> Delete
                                 </button>
@@ -115,6 +108,20 @@ export function WorkspaceActions({ workspace, onClose }: Props) {
                     </motion.div>
                 )}
             </AnimatePresence>
+            <ConfirmDialog
+                open={confirmDelete}
+                title="Delete workspace?"
+                message={`Are you sure you want to delete "${workspace.name}"? This action cannot be undone.`}
+                confirmLabel="Delete"
+                onConfirm={async () => {
+                    await supabase.from("workspaces").delete().eq("slug", workspace.slug);
+                    await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+                    if (currentWorkspace === workspace.slug) setWorkspace("personal");
+                    setConfirmDelete(false);
+                    onClose();
+                }}
+                onCancel={() => setConfirmDelete(false)}
+            />
         </div>
     );
 }
