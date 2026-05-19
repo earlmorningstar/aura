@@ -9,12 +9,9 @@
  * 3. ContentPerformanceCards grid (with real-time additions)
  * 4. Publishing cadence heatmap strip
  * 5. Content format breakdown
- *
- * Fixes:
- * - Top‑level gap‑6 prevents section overlapping
- * - “+ Add content” button opens a modal form
- * - New content is added to local state and shown immediately
- * - Success toast confirms the action
+ * 6. “+ Add content” button opens a modal form
+ * 7. New content is added to local state and shown immediately
+ * 8. Success toast confirms the action
  */
 
 import * as React from "react";
@@ -29,7 +26,6 @@ import {
   Calendar,
   Plus,
   X,
-  CheckCircle2,
 } from "lucide-react";
 import { ContentPerformanceCards } from "./content-performance-cards";
 import type { ContentPiece } from "./content-performance-cards";
@@ -310,40 +306,6 @@ function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
   );
 }
 
-/* ─── Success toast ──────────────────────────────────────────────── */
-
-function SuccessToast({ show, onDone }: { show: boolean; onDone: () => void }) {
-  React.useEffect(() => {
-    if (!show) return;
-    const t = setTimeout(onDone, 2200);
-    return () => clearTimeout(t);
-  }, [show, onDone]);
-
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl px-4 py-3"
-          style={{
-            background: "rgba(10,10,18,0.92)",
-            backdropFilter: "blur(24px)",
-            border: "1px solid rgba(var(--status-success-rgb) / 0.3)",
-            boxShadow: "var(--shadow-lg)",
-          }}
-          initial={{ opacity: 0, y: 16, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 12, scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 26 }}
-        >
-          <CheckCircle2 size={18} style={{ color: "var(--status-success)" }} />
-          <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-            Content added successfully
-          </span>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
 
 /* ─── Sort / filter bar ────────────────── */
 
@@ -659,10 +621,9 @@ export function ContentPage() {
           </div>
         </AnimatedItem>
 
-        {/* ── Section 2: KPI strip (placeholder, will compute later) ── */}
+        {/* ── Section 2: KPI strip ── */}
         <AnimatedItem variant="fadeUp">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-            {/* We'll compute KPIs from real pieces later; for now static */}
             <GlassKPI
               title="Content Pieces"
               value={`${pieces.length}`}

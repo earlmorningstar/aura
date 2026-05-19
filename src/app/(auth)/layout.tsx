@@ -6,6 +6,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { ClientPanels } from './client-panels';
 import { MobileDashboardHeader } from "@/components/layout/mobile-dashboard-header";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { SubscriptionGuard } from "@/components/auth/subscription-guard";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -37,7 +38,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <main className="w-full flex-1 pb-24 lg:pb-0 px-4 pt-6 lg:px-0 lg:pt-0">
             <Suspense fallback={<SkeletonDashboard kpiCount={6} />}>
               <ErrorBoundary>
-                {children}
+                <SubscriptionGuard>
+                  {children}
+                </SubscriptionGuard>
               </ErrorBoundary>
             </Suspense>
           </main>

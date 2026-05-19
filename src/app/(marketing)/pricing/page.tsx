@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
-import Link from "next/link";
+import { CheckoutButton } from "./pricing-client";
 
 export const metadata: Metadata = {
   title: "Pricing · Aura",
@@ -26,12 +26,10 @@ export default function PricingPage() {
               <li>✓ Weekly AI insights</li>
               <li>✓ Basic content analytics</li>
             </ul>
-            <Link
-              href="/login"
-              className="block w-full rounded-xl bg-cyan-400 px-6 py-3 text-center font-semibold text-black hover:bg-cyan-300 transition-colors"
-            >
-              Start free trial
-            </Link>
+            <CheckoutButton
+              priceId={process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID!}
+              label="Start Starter Trial"
+            />
           </div>
           <div className="rounded-2xl border border-purple-500/20 bg-white/5 p-8 w-80 backdrop-blur">
             <p className="text-sm uppercase tracking-wide text-purple-400 mb-4">Pro</p>
@@ -42,12 +40,10 @@ export default function PricingPage() {
               <li>✓ Daily AI insights</li>
               <li>✓ Priority support</li>
             </ul>
-            <Link
-              href="/login"
-              className="block w-full rounded-xl bg-purple-400 px-6 py-3 text-center font-semibold text-black hover:bg-purple-300 transition-colors"
-            >
-              Start free trial
-            </Link>
+            <CheckoutButton
+              priceId={process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!}
+              label="Start Pro Trial"
+            />
           </div>
         </div>
         <p className="mt-8 text-sm text-white/40">No credit card required · Cancel any time · 14-day free trial</p>

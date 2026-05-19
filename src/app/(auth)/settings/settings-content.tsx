@@ -3,10 +3,11 @@
 import { AnimatedPage, AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GlassButton } from "@/components/ui/glass-button";
-import { User, Bell, Shield, Palette, ChevronRight } from "lucide-react";
+import { User, Bell, Shield, Palette, ChevronRight, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
+import { useRouter } from "next/navigation";
 
 export function SettingsContent() {
     const { displayName } = useUser();
@@ -130,6 +131,26 @@ export function SettingsContent() {
                                     Edit
                                 </GlassButton>
                             )}
+                        </GlassCard>
+
+                        {/* ── Subscription card ── */}
+                        <GlassCard visual="default" padding="md" className="flex items-center gap-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                style={{ background: "rgba(var(--accent-cyan-rgb) / 0.1)", border: "1px solid rgba(var(--accent-cyan-rgb) / 0.15)", color: "var(--accent-cyan)" }}
+                            >
+                                <CreditCard size={18} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Subscription</h3>
+                                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Manage plan, billing, and invoices</p>
+                            </div>
+                            <GlassButton variant="ghost" size="xs" onClick={async () => {
+                                const res = await fetch("/api/portal", { method: "POST" });
+                                const { url } = await res.json();
+                                if (url) window.location.href = url;
+                            }}>
+                                Manage
+                            </GlassButton>
                         </GlassCard>
 
                         {/* ── Other cards ── */}
