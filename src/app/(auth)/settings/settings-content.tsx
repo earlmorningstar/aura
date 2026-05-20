@@ -7,10 +7,12 @@ import { User, Bell, Shield, Palette, ChevronRight, CreditCard } from "lucide-re
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
-import { useRouter } from "next/navigation";
+import { SubscriptionButton } from "./subscription-button";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export function SettingsContent() {
     const { displayName } = useUser();
+    const { status } = useSubscription();
     const [showNameEdit, setShowNameEdit] = useState(false);
     const [newName, setNewName] = useState("");
     const [saving, setSaving] = useState(false);
@@ -135,22 +137,31 @@ export function SettingsContent() {
 
                         {/* ── Subscription card ── */}
                         <GlassCard visual="default" padding="md" className="flex items-center gap-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                                style={{ background: "rgba(var(--accent-cyan-rgb) / 0.1)", border: "1px solid rgba(var(--accent-cyan-rgb) / 0.15)", color: "var(--accent-cyan)" }}
+                            <div
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                style={{
+                                    background: "rgba(var(--accent-cyan-rgb) / 0.1)",
+                                    border: "1px solid rgba(var(--accent-cyan-rgb) / 0.15)",
+                                    color: "var(--accent-cyan)",
+                                }}
                             >
                                 <CreditCard size={18} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Subscription</h3>
-                                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Manage plan, billing, and invoices</p>
+                                <h3
+                                    className="font-display font-semibold text-sm"
+                                    style={{ color: "var(--text-primary)" }}
+                                >
+                                    Subscription
+                                </h3>
+                                <p
+                                    className="text-xs mt-0.5"
+                                    style={{ color: "var(--text-muted)" }}
+                                >
+                                    {status === "pro" ? "Manage your Pro plan" : "Upgrade to Pro for full access"}
+                                </p>
                             </div>
-                            <GlassButton variant="ghost" size="xs" onClick={async () => {
-                                const res = await fetch("/api/portal", { method: "POST" });
-                                const { url } = await res.json();
-                                if (url) window.location.href = url;
-                            }}>
-                                Manage
-                            </GlassButton>
+                            <SubscriptionButton />
                         </GlassCard>
 
                         {/* ── Other cards ── */}

@@ -15,11 +15,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
         }
 
+        // Using request's origin as a fallback if the env variable isn't set
+        const baseUrl =
+            process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
+
         const session = await stripe.checkout.sessions.create({
             line_items: [{ price: priceId, quantity: 1 }],
             mode: "subscription",
-            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
+            success_url: `${baseUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${baseUrl}/pricing`,
             customer_email: user.email,
             metadata: { user_id: user.id },
             subscription_data: { metadata: { user_id: user.id } },
