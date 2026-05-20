@@ -28,17 +28,22 @@ export function SubscriptionButton() {
     };
 
     const handleManage = async () => {
-        const res = await fetch("/api/portal", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-        });
-        if (!res.ok) {
-            alert("Could not open customer portal");
-            return;
+        try {
+            const res = await fetch("/api/portal", {
+                method: "POST",
+                credentials: "include",
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "Could not open customer portal");
+                return;
+            }
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch {
+            alert("Network error. Please try again.");
         }
-        const { url } = await res.json();
-        if (url) window.location.href = url;
     };
 
     if (loading) {

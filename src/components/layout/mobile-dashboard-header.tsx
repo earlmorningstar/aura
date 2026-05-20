@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useUser } from "@/hooks/use-user";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useDateRangeStore, type DatePreset } from "@/stores/date-range-store";
+import { SubscriptionPill } from "@/components/billing/subscription-pill";
 
 const PRESETS: { label: string; value: DatePreset }[] = [
     { label: "7D", value: "7d" },
@@ -82,6 +83,7 @@ export function MobileDashboardHeader() {
 
                 {/* Right: Workspace pill + quick date */}
                 <div className="flex items-center gap-2">
+                    <SubscriptionPill />
                     {/* Workspace pill */}
                     <div
                         className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"

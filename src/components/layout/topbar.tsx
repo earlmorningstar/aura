@@ -20,15 +20,24 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { GlassButton } from "@/components/ui/glass-button";
 import { useUIStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
+import { SubscriptionPill } from "@/components/billing/subscription-pill";
+import { useUser } from "@/hooks/use-user";
 
 /* ─── Avatar ─────────────────────────────────────────────────────── */
 
 interface AvatarButtonProps {
-  initials?: string;
   online?: boolean;
 }
 
-function AvatarButton({ initials = "AU", online = true }: AvatarButtonProps) {
+function AvatarButton({ online = true }: { online?: boolean }) {
+  const { displayName } = useUser();
+  const initials = (displayName || "A")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <motion.button
       className="relative flex items-center gap-2 rounded-xl px-2 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60"
@@ -143,7 +152,7 @@ function AskAuraButton() {
 /* ─── Topbar ─────────────────────────────────────────────────────── */
 
 export function Topbar() {
-  const { isAIOpen, setAIOpen } = useUIStore();
+  // const { isAIOpen, setAIOpen } = useUIStore();
 
   return (
     <>
@@ -168,10 +177,11 @@ export function Topbar() {
         <DateRangePicker />
         <div className="flex-1" />
         <div className="flex items-center gap-2">
+          <SubscriptionPill />
           <AskAuraButton />
           <div className="mx-1 hidden h-5 w-px sm:block" style={{ background: "rgba(var(--glass-border-rgb) / 0.12)" }} aria-hidden />
           <NotificationBell count={3} />
-          <AvatarButton initials="EC" />
+          <AvatarButton />
         </div>
       </motion.header>
     </>
