@@ -65,11 +65,43 @@ export async function POST(req: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
         const priceId = subscription.items.data[0]?.price?.id;
-        const plan = priceId ? (PLANS[priceId] ?? "free") : "free";
-        const status = subscription.status === "active" || subscription.status === "trialing" ? plan : "free";
-        await supabase.from("profiles")
-          .update({ subscription_status: status, plan, updated_at: new Date().toISOString() })
+        const plan = priceId
+          ? (PLANS[priceId] ?? "free")
+          : "free";
+
+        const status =
+          subscription.status === "active" ||
+            subscription.status === "trialing"
+            ? plan
+            : "free";
+
+        // Get user profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("stripe_customer_id", customerId)
+          .single();
+
+        // Update subscription
+        await supabase
+          .from("profiles")
+          .update({
+            subscription_status: status,
+            plan,
+            updated_at: new Date().toISOString(),
+          })
           .eq("stripe_customer_id", customerId);
+
+        // Insert notification
+        if (profile?.id) {
+          await supabase.from("notifications").insert({
+            user_id: profile.id,
+            title: "Subscription updated",
+            body: `Your plan is now ${plan}.`,
+            type: "subscription",
+          });
+        }
+
         break;
       }
     }

@@ -5,17 +5,16 @@
  * containing the topbar and sidebar actions hidden on small screens.
  */
 
-import * as React from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   X,
   Sparkles,
-  Bell,
   Settings,
   LogOut,
 } from "lucide-react";
-import Link from "next/link";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useUIStore } from "@/stores/ui-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -27,23 +26,16 @@ import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { NotificationBell } from "../ui/notification-bell";
 
 export function MobileQuickActions() {
   const router = useRouter();
-  const { displayName } = useUser();
+  const { displayName, initials } = useUser();
   const { currentWorkspace, setWorkspace } = useWorkspaceStore();
   const { data: workspaces = [] } = useWorkspaces();
   const toggleAIOpen = useUIStore((s) => s.toggleAIOpen);
   const [open, setOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
-  const initials = (displayName || "A")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 
   const handleAskAI = () => {
     setOpen(false);
@@ -113,12 +105,7 @@ export function MobileQuickActions() {
                   >
                     Ask Aura AI
                   </GlassButton>
-                  <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-                    <Bell size={16} className="text-white/60" />
-                    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-gradient-brand text-[10px] font-bold text-black">
-                      3
-                    </span>
-                  </button>
+                  <NotificationBell />
                 </div>
 
                 <div>

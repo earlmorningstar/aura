@@ -17,10 +17,21 @@ export default function ContactPage() {
                     Have a question, suggestion, or just want to say hi?
                 </p>
                 <div className="inline-block rounded-2xl border border-cyan-500/20 bg-white/5 p-6 backdrop-blur">
-                    <p className="font-semibold mb-2">Email</p>
-                    <a href="mailto:hello@useaura.app" className="text-cyan-400 hover:underline">
-                        hello@useaura.app
-                    </a>
+                    <p className="mb-3 font-semibold">Email</p>
+                    <div className="flex flex-col gap-2">
+                        <a
+                            href="mailto:hello@useaura.app"
+                            className="text-cyan-400 transition hover:underline"
+                        >
+                            hello@useaura.app
+                        </a>
+                        <a
+                            href="mailto:support@useaura.app"
+                            className="text-cyan-400 transition hover:underline"
+                        >
+                            sayhitojoelinton@gmail.com
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

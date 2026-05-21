@@ -7,6 +7,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmDialog } from "../ui/confirm-dialog";
+import { notify } from "@/lib/notify";
 
 interface Props {
     workspace: { slug: string; name: string };
@@ -117,6 +118,10 @@ export function WorkspaceActions({ workspace, onClose }: Props) {
                     await supabase.from("workspaces").delete().eq("slug", workspace.slug);
                     await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
                     if (currentWorkspace === workspace.slug) setWorkspace("personal");
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await notify(user.id, "Workspace deleted", `"${workspace.name}" was permanently removed.`, "workspace");
+                    }
                     setConfirmDelete(false);
                     onClose();
                 }}

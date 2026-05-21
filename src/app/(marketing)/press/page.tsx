@@ -15,7 +15,7 @@ export default function PressPage() {
                 <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Press</h1>
                 <p className="text-white/70 mb-8">
                     For media inquiries, brand assets, or interview requests, please email{" "}
-                    <span className="text-cyan-400">press@useaura.app</span>.
+                    <span className="text-cyan-400">press@useaura.app or sayhitojoelinton@gmail.com</span>.
                 </p>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
                     <h2 className="font-semibold mb-3">Brand Assets</h2>

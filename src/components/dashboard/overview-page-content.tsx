@@ -13,6 +13,7 @@
  */
 
 import * as React from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { KPIGrid } from "./kpi-grid";
@@ -28,6 +29,8 @@ import { differenceInDays } from "date-fns";
 import { useAudienceData } from "@/hooks/use-audience-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWorkspaceStore } from "@/stores/workspace-store"
+import { useUser } from "@/hooks/use-user";
+import { notify } from "@/lib/notify";
 
 const RevenueTrendChart = dynamic(
   () => import("@/components/charts/revenue-trend-chart").then(mod => mod.RevenueTrendChart),
@@ -197,8 +200,18 @@ export function OverviewPageContent() {
   const refetch = () => { };
   const queryClient = useQueryClient();
   const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
+  const { userId, displayName } = useUser();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (!userId) return;
+    const key = "aura-login-notified";
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    notify(userId, "Signed in", `Welcome back, ${displayName}!`, "login");
+  }, [userId, displayName]);
+
+
+  useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["transactions"] });
     queryClient.invalidateQueries({ queryKey: ["audience-data"] });
   }, [currentWorkspace, queryClient]);

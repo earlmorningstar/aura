@@ -9,6 +9,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import type { Workspace } from "@/stores/workspace-store";
+import { notify } from "@/lib/notify";
 
 function generateSlug(name: string): string {
   return name
@@ -80,6 +81,7 @@ export function NewWorkspaceModal() {
         setSuccess(true);
         await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
         setWorkspace(data.slug);
+        await notify(user.id, "Workspace created", `"${trimmed}" workspace added.`, "workspace");
       } else {
         // ── Local-only fallback (no user signed in) ──
         const slug = generateSlug(trimmed);

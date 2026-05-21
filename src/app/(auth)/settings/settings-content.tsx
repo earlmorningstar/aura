@@ -3,20 +3,30 @@
 import { AnimatedPage, AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GlassButton } from "@/components/ui/glass-button";
-import { User, Bell, Shield, Palette, ChevronRight, CreditCard } from "lucide-react";
+import { User, Bell, Check, Shield, Palette, ChevronRight, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { SubscriptionButton } from "./subscription-button";
 import { useSubscription } from "@/hooks/use-subscription";
+import { notify } from "@/lib/notify";
+import { useNotifications } from "@/hooks/use-notifications";
 
-export function SettingsContent() {
+
+export async function SettingsContent() {
     const { displayName, refresh } = useUser();
     const { status } = useSubscription();
     const [showNameEdit, setShowNameEdit] = useState(false);
     const [newName, setNewName] = useState("");
     const [saving, setSaving] = useState(false);
     const [nameError, setNameError] = useState("");
+    const { data: { user } } = await supabase.auth.getUser();
+    const { unreadCount, markAllAsRead } = useNotifications();
+
+
+    if (user) {
+        await notify(user.id, "Profile updated", `Your display name is now "${newName.trim()}".`, "profile");
+    }
 
     return (
         <AnimatedPage>
@@ -165,9 +175,29 @@ export function SettingsContent() {
                             <SubscriptionButton />
                         </GlassCard>
 
+                        {/* ── Notifications card ── */}
+
+                        <GlassCard visual="default" padding="md" className="flex items-center gap-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                style={{ background: "rgba(var(--glass-bg-rgb) / 0.1)", border: "1px solid rgba(var(--glass-border-rgb) / 0.15)", color: "var(--accent-cyan)" }}
+                            >
+                                <Bell size={18} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Notifications</h3>
+                                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                                    {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
+                                </p>
+                            </div>
+                            {unreadCount > 0 && (
+                                <GlassButton variant="ghost" size="xs" leadingIcon={<Check size={14} />} onClick={() => markAllAsRead()}>
+                                    Mark all read
+                                </GlassButton>
+                            )}
+                        </GlassCard>
+
                         {/* ── Other cards ── */}
                         {[
-                            { icon: Bell, title: "Notifications", desc: "Configure how and when you're notified.", action: "Configure" },
                             { icon: Shield, title: "Security", desc: "Manage your password and two‑factor authentication.", action: "Manage" },
                             { icon: Palette, title: "Appearance", desc: "Choose between dark, light, and system themes.", action: "Customise" },
                         ].map((s) => {

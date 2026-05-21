@@ -27,7 +27,7 @@ export default function PrivacyPage() {
                     <p>Your analytics data is stored in your own Supabase project. We never access
                         it unless you explicitly grant permission for support purposes.</p>
                     <h2 className="text-xl font-semibold text-white mt-6">Contact</h2>
-                    <p>If you have any questions, contact us at privacy@useaura.app.</p>
+                    <p>If you have any questions, contact us at privacy@useaura.app or sayhitojoelinton@gmail.com</p>
                 </div>
             </div>
         </div>

@@ -22,6 +22,7 @@ import { useUIStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { SubscriptionPill } from "@/components/billing/subscription-pill";
 import { useUser } from "@/hooks/use-user";
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 /* ─── Avatar ─────── */
 
@@ -30,13 +31,7 @@ interface AvatarButtonProps {
 }
 
 function AvatarButton({ online = true }: { online?: boolean }) {
-  const { displayName } = useUser();
-  const initials = (displayName || "A")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  const { initials } = useUser();
 
   return (
     <motion.button
@@ -80,50 +75,6 @@ function AvatarButton({ online = true }: { online?: boolean }) {
         aria-hidden
         style={{ color: "var(--text-tertiary)" }}
       />
-    </motion.button>
-  );
-}
-
-/* ─── Notification bell ────── */
-
-interface NotificationBellProps {
-  count?: number;
-}
-
-function NotificationBell({ count = 0 }: NotificationBellProps) {
-  return (
-    <motion.button
-      className="relative flex h-9 w-9 items-center justify-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60"
-      style={{
-        background: "rgba(var(--glass-bg-rgb) / 0.06)",
-        border: "1px solid rgba(var(--glass-border-rgb) / var(--glass-border-opacity))",
-        color: "var(--text-secondary)",
-      }}
-      whileHover={{
-        color: "var(--text-primary)",
-        background: "rgba(var(--glass-bg-rgb) / 0.10)",
-      }}
-      whileTap={{
-        scale: 0.92,
-        transition: { type: "spring", stiffness: 600, damping: 28 },
-      }}
-      aria-label={count > 0 ? `${count} notifications` : "Notifications"}
-    >
-      <Bell size={16} />
-      {count > 0 && (
-        <motion.span
-          className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold"
-          style={{
-            background: "var(--gradient-brand)",
-            color: "var(--color-bg-void)",
-          }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 600, damping: 22, delay: 0.2 }}
-        >
-          {count > 9 ? "9+" : count}
-        </motion.span>
-      )}
     </motion.button>
   );
 }
@@ -179,7 +130,7 @@ export function Topbar() {
           <SubscriptionPill />
           <AskAuraButton />
           <div className="mx-1 hidden h-5 w-px sm:block" style={{ background: "rgba(var(--glass-border-rgb) / 0.12)" }} aria-hidden />
-          <NotificationBell count={3} />
+          <NotificationBell />
           <AvatarButton />
         </div>
       </motion.header>

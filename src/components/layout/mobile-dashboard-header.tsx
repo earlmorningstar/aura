@@ -14,17 +14,9 @@ const PRESETS: { label: string; value: DatePreset }[] = [
 ];
 
 export function MobileDashboardHeader() {
-    const { displayName } = useUser();
+    const { displayName, initials } = useUser();
     const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
     const { preset, setPreset } = useDateRangeStore();
-
-    // Get initials from display name
-    const initials = displayName
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
 
     // Capitalise workspace name
     const wsName = currentWorkspace
