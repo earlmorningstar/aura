@@ -8,6 +8,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+import { PLANS } from "@/lib/plans";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -36,9 +37,15 @@ export async function POST(req: NextRequest) {
         const userId = session.metadata?.user_id;
         if (!userId) break;
 
+        // Getting price ID from the first line item
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+        const priceId = lineItems.data[0]?.price?.id;
+        const plan = priceId ? (PLANS[priceId] ?? "pro") : "pro";
+
         await supabase.from("profiles").upsert({
           id: userId,
-          subscription_status: "pro",
+          subscription_status: plan,
+          plan,
           stripe_customer_id: session.customer as string,
           updated_at: new Date().toISOString(),
         }, { onConflict: "id" });
@@ -57,9 +64,11 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
-        const status = subscription.status === "active" || subscription.status === "trialing" ? "pro" : "free";
+        const priceId = subscription.items.data[0]?.price?.id;
+        const plan = priceId ? (PLANS[priceId] ?? "free") : "free";
+        const status = subscription.status === "active" || subscription.status === "trialing" ? plan : "free";
         await supabase.from("profiles")
-          .update({ subscription_status: status, updated_at: new Date().toISOString() })
+          .update({ subscription_status: status, plan, updated_at: new Date().toISOString() })
           .eq("stripe_customer_id", customerId);
         break;
       }
