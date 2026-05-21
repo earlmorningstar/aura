@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
     title: "Privacy Policy · Aura",
     description: "How we handle your data.",
-};
+    path: "/privacy",
+});
 
 export default function PrivacyPage() {
     return (

@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
     title: "Press · Aura",
     description: "Brand assets and press contact.",
-};
+    path: "/press",
+});
 
 export default function PressPage() {
     return (
         <div className="min-h-screen bg-[#05050f] text-white">
             <MarketingNav />
             <div className="mx-auto max-w-3xl px-6 py-10">
-                 <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Press</h1>
+                <h1 className="font-display text-3.5xl font-bold mb-8 leading-normal">Press</h1>
                 <p className="text-white/70 mb-8">
                     For media inquiries, brand assets, or interview requests, please email{" "}
                     <span className="text-cyan-400">press@useaura.app</span>.

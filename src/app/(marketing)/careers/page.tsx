@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+
+export const metadata = createMetadata({
   title: "Careers · Aura",
-};
+  description: "Join the Aura team and help build the best dashboard for creators.",
+  path: "/careers",
+});
 
 export default function CareersPage() {
   return (

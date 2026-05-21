@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Blog · Aura",
   description: "Tips, stories, and insights for creators and solopreneurs.",
-};
+  path: "/blog",
+});
 
 const posts = [
   { title: "How to turn one video into $10k", date: "Apr 28, 2026" },

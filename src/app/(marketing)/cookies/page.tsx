@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
     title: "Cookie Policy · Aura",
     description: "How Aura uses cookies.",
-};
+    path: "/cookies",
+});
 
 export default function CookiePage() {
     return (

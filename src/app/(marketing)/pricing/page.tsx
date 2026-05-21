@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
 import { CheckoutButton } from "./pricing-client";
 import { AutoCheckout } from "./auto-checkout";
 import { Suspense } from "react";
+import { createMetadata } from "@/lib/metadata";
 
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Pricing · Aura",
   description: "Simple, transparent pricing for solo creators.",
-};
+  path: "/pricing",
+});
 
 export default function PricingPage() {
   return (

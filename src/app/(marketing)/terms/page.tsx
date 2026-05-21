@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
     title: "Terms of Service · Aura",
     description: "Terms and conditions for using Aura.",
-};
+    path: "/terms",
+});
 
 export default function TermsPage() {
     return (

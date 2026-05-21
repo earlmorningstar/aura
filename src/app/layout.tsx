@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/lib/query-client";
+import { Analytics } from "@vercel/analytics/react";
+import "./globals.css";
+
 
 const syne = Syne({
   subsets: ["latin"],
@@ -46,7 +48,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Aura" }],
   creator: "Aura",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://useaura.app",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://aura-ai-dash.vercel.app",
   ),
   openGraph: {
     type: "website",
@@ -73,7 +75,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   robots: {
-    index: false, 
+    index: false,
     follow: false,
   },
   icons: {
@@ -100,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </QueryProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

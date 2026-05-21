@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import { MarketingNav } from "../marketing-client";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
     title: "System Status · Aura",
     description: "Current operational status of Aura services.",
-};
+    path: "/status",
+});
 
 export default function StatusPage() {
     return (
