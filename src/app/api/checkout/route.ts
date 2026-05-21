@@ -31,6 +31,18 @@ export async function POST(req: NextRequest) {
             billing_address_collection: "required",
         });
 
+        // Saving the Stripe customer ID immediately
+        if (session.customer) {
+            await supabase
+                .from("profiles")
+                .upsert({
+                    id: user.id,
+                    email: user.email,
+                    stripe_customer_id: session.customer as string,
+                    updated_at: new Date().toISOString(),
+                }, { onConflict: "id" });
+        }
+
         return NextResponse.json({ url: session.url });
     } catch (err) {
         console.error("[checkout] Error:", err);

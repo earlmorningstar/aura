@@ -10,24 +10,47 @@ export async function POST(_req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        // Get profile
         const { data: profile } = await supabase
             .from("profiles")
-            .select("stripe_customer_id")
+            .select("stripe_customer_id, email")
             .eq("id", user.id)
             .single();
 
-        if (!profile?.stripe_customer_id) {
-            // No Stripe customer yet – maybe webhook hasn't fired, or it's an old account.
-            // We'll return a specific error so the UI can guide the user.
+        let customerId = profile?.stripe_customer_id;
+
+        // If no customer ID saved, try to find the customer by email
+        if (!customerId && user.email) {
+            const customers = await stripe.customers.list({
+                email: user.email,
+                limit: 1,
+            });
+
+            if (customers.data.length > 0) {
+                const firstCustomer = customers.data[0];
+                if (firstCustomer) {
+                    customerId = firstCustomer.id;
+
+                    await supabase
+                        .from("profiles")
+                        .update({ stripe_customer_id: customerId })
+                        .eq("id", user.id);
+                }
+            }
+        }
+
+        if (!customerId) {
             return NextResponse.json(
                 { error: "No Stripe customer found. Please contact support." },
                 { status: 400 }
             );
         }
 
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
         const session = await stripe.billingPortal.sessions.create({
-            customer: profile.stripe_customer_id,
-            return_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/dashboard`,
+            customer: customerId,
+            return_url: `${baseUrl}/dashboard`,
         });
 
         return NextResponse.json({ url: session.url });
