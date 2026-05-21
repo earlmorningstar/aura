@@ -12,7 +12,7 @@
  *   removeTransaction → (id: string) => void
  *   refetch         → () => void (force refresh of the transaction list)
  *
- * Critical fix: when the server returns an empty list, we still show
+ * When the server returns an empty list, we still show
  * local transactions (optimistic / offline).  The merge logic always
  * combines server entries with any local transaction whose ID is not
  * yet present in the server result.
@@ -101,7 +101,7 @@ export function useRevenue() {
     transactions,
     isLoading,
     isError,
-    addTransaction: (tx: NewTransaction) => addMutation.mutate(tx),
+    addTransaction: (tx: NewTransaction) => addMutation.mutateAsync(tx), 
     removeTransaction: (id: string) => deleteMutation.mutate(id),
     refetch,
   };

@@ -17,7 +17,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ChevronDown, CheckCircle2, AlertCircle } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GlassButton } from "@/components/ui/glass-button";
-// import { useRevenueStore } from "@/stores/revenue-store";
 import { useRevenue } from "@/hooks/use-revenue";
 import { cn } from "@/lib/utils";
 
@@ -94,9 +93,9 @@ function GlassInput({ hasError, className, ...props }: GlassInputProps) {
         // Override border color if error
         ...(hasError
           ? {
-              borderColor: "rgba(var(--status-error-rgb) / 0.45)",
-              boxShadow: "0 0 0 3px rgba(var(--status-error-rgb) / 0.08)",
-            }
+            borderColor: "rgba(var(--status-error-rgb) / 0.45)",
+            boxShadow: "0 0 0 3px rgba(var(--status-error-rgb) / 0.08)",
+          }
           : {}),
       }}
       {...props}
@@ -239,16 +238,16 @@ function SuccessOverlay({ onDone }: SuccessOverlayProps) {
 /* ─── TransactionForm ────────────────────────────────────────────── */
 
 export function TransactionForm() {
-  const { addTransaction } = useRevenue();
+  const { addTransaction, refetch } = useRevenue();
 
   const [form, setForm] = React.useState<FormState>({
-    amount:      "",
-    source:      "Stripe",
+    amount: "",
+    source: "Stripe",
     description: "",
   });
-  const [errors, setErrors]     = React.useState<FormErrors>({});
+  const [errors, setErrors] = React.useState<FormErrors>({});
   const [submitting, setSubmitting] = React.useState(false);
-  const [success, setSuccess]   = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
 
   const update = (key: keyof FormState, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -277,18 +276,18 @@ export function TransactionForm() {
     setErrors(next);
     return Object.keys(next).length === 0;
   };
-
+  
   const handleSubmit = async () => {
     if (!validate()) return;
     setSubmitting(true);
-
     try {
-      addTransaction({
-        date:        new Date().toISOString().split("T")[0]!,
-        amount:      parseFloat(form.amount),
-        source:      form.source,
+      await addTransaction({
+        date: new Date().toISOString().split("T")[0]!,
+        amount: parseFloat(form.amount),
+        source: form.source,
         description: form.description.trim() || "Manual entry",
       });
+      refetch();
       setForm({ amount: "", source: "Stripe", description: "" });
       setSuccess(true);
     } finally {

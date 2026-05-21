@@ -24,7 +24,7 @@ import { OverviewPageContent } from "@/components/dashboard/overview-page-conten
 import { useUser } from "@/hooks/use-user";
 
 
-/* ─── Greeting logic ─────────────────────────────────────────────── */
+/* ─── Greeting logic ────── */
 
 function getGreeting(): { greeting: string; emoji: string } {
   const hour = new Date().getHours();
@@ -34,7 +34,7 @@ function getGreeting(): { greeting: string; emoji: string } {
   return { greeting: "Working late", emoji: "🌙" };
 }
 
-/* ─── Page header ────────────────────────────────────────────────── */
+/* ─── Page header ────── */
 
 function PageHeader() {
   const { greeting, emoji } = getGreeting();
@@ -48,7 +48,7 @@ function PageHeader() {
             <h1
               className="hidden lg:block font-display font-bold leading-[1.1]"
               style={{
-                fontSize: "clamp(1.30rem, 3.5vw, 2.5rem)",
+                fontSize: "clamp(1.20rem, 3.5vw, 2.4rem)",
                 letterSpacing: "var(--tracking-tight)",
                 color: "var(--text-primary)",
               }}
@@ -102,17 +102,17 @@ function PageHeader() {
   );
 }
 
-/* ─── Page ───────────────────────────────────────────────────────── */
+/* ─── Page ────── */
 
 export default function DashboardPage() {
   return (
     <AnimatedPage>
-      {/* ── Header ────────────────────────────────────────────── */}
+      {/* ── Header ───── */}
       <AnimatedWrapper variant="fadeUp" delay={0}>
         <PageHeader />
       </AnimatedWrapper>
 
-      {/* ── Dashboard content ─────────────────────────────────── */}
+      {/* ── Dashboard content ───── */}
       <div className="mt-8">
         <OverviewPageContent />
       </div>

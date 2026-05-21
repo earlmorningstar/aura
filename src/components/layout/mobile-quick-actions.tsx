@@ -24,12 +24,26 @@ import { WorkspaceActions } from "@/components/workspace/workspace-actions";
 import { useNewWorkspaceModalStore } from "@/stores/new-workspace-modal-store";
 import { GlassButton } from "@/components/ui/glass-button";
 import { supabase } from "@/lib/supabase/client";
+import { useUser } from "@/hooks/use-user";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function MobileQuickActions() {
-  const [open, setOpen] = React.useState(false);
-  const toggleAIOpen = useUIStore((s) => s.toggleAIOpen);
+  const router = useRouter();
+  const { displayName } = useUser();
   const { currentWorkspace, setWorkspace } = useWorkspaceStore();
   const { data: workspaces = [] } = useWorkspaces();
+  const toggleAIOpen = useUIStore((s) => s.toggleAIOpen);
+  const [open, setOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const initials = (displayName || "A")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   const handleAskAI = () => {
     setOpen(false);
@@ -114,18 +128,13 @@ export function MobileQuickActions() {
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
                       style={{ background: "var(--gradient-brand)", color: "var(--color-bg-void)" }}
                     >
-                      EC
+                      {initials}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">Earl Cameron</p>
+                      <p className="text-sm font-medium text-white">{displayName}</p>
                       <p className="text-xs text-white/40">Pro plan</p>
                     </div>
-                    <button className="ml-auto text-xs text-white/60 hover:text-white" onClick={async () => {
-                      await supabase.auth.signOut();
-                      window.location.href = "/login";
-                    }}>
-                      <LogOut size={14} />
-                    </button>
+
                   </div>
                 </div>
 
@@ -166,14 +175,36 @@ export function MobileQuickActions() {
                 </div>
 
                 {/* Settings */}
-                <Link
-                  href="/settings"
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-white/60 hover:bg-white/5"
-                  onClick={() => setOpen(false)}
-                >
-                  <Settings size={16} /> Settings
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-white/60 hover:bg-white/5"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Settings size={16} />
+                    Settings
+                  </Link>
+
+                  <button
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10"
+                    onClick={() => setShowLogoutConfirm(true)}
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
               </div>
+              <ConfirmDialog
+                open={showLogoutConfirm}
+                title="Sign out?"
+                message="Are you sure you want to sign out of your account?"
+                confirmLabel="Sign out"
+                onConfirm={async () => {
+                  await supabase.auth.signOut();
+                  router.push("/login");
+                }}
+                onCancel={() => setShowLogoutConfirm(false)}
+              />
             </motion.div>
           </>
         )}

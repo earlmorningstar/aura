@@ -26,6 +26,8 @@ import { useRevenue } from "@/hooks/use-revenue";
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { differenceInDays } from "date-fns";
 import { useAudienceData } from "@/hooks/use-audience-data";
+import { useQueryClient } from "@tanstack/react-query";
+import { useWorkspaceStore } from "@/stores/workspace-store"
 
 const RevenueTrendChart = dynamic(
   () => import("@/components/charts/revenue-trend-chart").then(mod => mod.RevenueTrendChart),
@@ -193,7 +195,13 @@ export function OverviewPageContent() {
   const isLoading = false;
   const isError = false;
   const refetch = () => { };
-  // const { pieces: contentPieces } = useContentPieces();
+  const queryClient = useQueryClient();
+  const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
+
+  React.useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    queryClient.invalidateQueries({ queryKey: ["audience-data"] });
+  }, [currentWorkspace, queryClient]);
 
   // Full-page skeleton while initial data loads
   if (isLoading) {

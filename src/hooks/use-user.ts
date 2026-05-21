@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 
 export function useUser() {
-  const [displayName, setDisplayName] = useState("there");
+  const [displayName, setDisplayName] = useState("User");
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refresh = () => setRefreshKey((k) => k + 1);
+
 
   useEffect(() => {
     async function get() {
@@ -18,13 +22,13 @@ export function useUser() {
           .single();
 
         setDisplayName(
-          profile?.display_name || user.email?.split("@")[0] || "there"
+          profile?.display_name || user.email?.split("@")[0] || "User"
         );
       }
       setLoading(false);
     }
     get();
-  }, []);
+  }, [refreshKey]);
 
-  return { displayName, loading };
+  return { displayName, loading, refresh };
 }

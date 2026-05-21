@@ -11,7 +11,7 @@ import { SubscriptionButton } from "./subscription-button";
 import { useSubscription } from "@/hooks/use-subscription";
 
 export function SettingsContent() {
-    const { displayName } = useUser();
+    const { displayName, refresh } = useUser();
     const { status } = useSubscription();
     const [showNameEdit, setShowNameEdit] = useState(false);
     const [newName, setNewName] = useState("");
@@ -84,6 +84,7 @@ export function SettingsContent() {
                                                             .from("profiles")
                                                             .update({ display_name: newName.trim() })
                                                             .eq("id", user.id);
+                                                        refresh();
                                                     }
                                                     setSaving(false);
                                                     setShowNameEdit(false);

@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { SubscriptionPill } from "@/components/billing/subscription-pill";
 import { useUser } from "@/hooks/use-user";
 
-/* ─── Avatar ─────────────────────────────────────────────────────── */
+/* ─── Avatar ─────── */
 
 interface AvatarButtonProps {
   online?: boolean;
@@ -84,7 +84,7 @@ function AvatarButton({ online = true }: { online?: boolean }) {
   );
 }
 
-/* ─── Notification bell ──────────────────────────────────────────── */
+/* ─── Notification bell ────── */
 
 interface NotificationBellProps {
   count?: number;
@@ -128,7 +128,7 @@ function NotificationBell({ count = 0 }: NotificationBellProps) {
   );
 }
 
-/* ─── Ask Aura AI button ─────────────────────────────────────────── */
+/* ─── Ask Aura AI button ───── */
 
 function AskAuraButton() {
   const toggleAIOpen = useUIStore((s) => s.toggleAIOpen);
@@ -149,10 +149,9 @@ function AskAuraButton() {
   );
 }
 
-/* ─── Topbar ─────────────────────────────────────────────────────── */
+/* ─── Topbar ───── */
 
 export function Topbar() {
-  // const { isAIOpen, setAIOpen } = useUIStore();
 
   return (
     <>

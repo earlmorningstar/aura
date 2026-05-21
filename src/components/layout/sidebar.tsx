@@ -35,6 +35,8 @@ import { GlassButton } from "@/components/ui/glass-button";
 import { useNewWorkspaceModalStore } from "@/stores/new-workspace-modal-store";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useRouter } from "next/navigation";
 
 /* ─── Nav items ──────────────────────────────────────────────────── */
 
@@ -234,7 +236,7 @@ function NavItem({ icon: Icon, label, href, isActive }: NavItemProps) {
 
 /* ─── Footer user section ────────────────────────────────────────── */
 
-function SidebarFooter() {
+function SidebarFooter({ onLogout }: { onLogout: () => void }) {
   return (
     <div
       className="flex items-center gap-3 px-3 py-4"
@@ -264,10 +266,7 @@ function SidebarFooter() {
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
-        onClick={async () => {
-          await supabase.auth.signOut();
-          window.location.href = "/login";
-        }}
+        onClick={onLogout}
         className="flex h-8 w-8 items-center justify-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60"
         style={{
           background: "rgba(var(--glass-bg-rgb) / 0.06)",
@@ -288,6 +287,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const { currentWorkspace, setWorkspace } = useWorkspaceStore();
   const { data: workspaces = [] } = useWorkspaces();
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
+  const router = useRouter();
 
   return (
     <motion.aside
@@ -364,7 +365,7 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* ── New workspace CTA ──────────────────────────────────── */}
+      {/* ── New workspace CTA ───── */}
       <div className="px-3 pb-2">
         <GlassButton
           variant="ghost"
@@ -377,8 +378,19 @@ export function Sidebar() {
         </GlassButton>
       </div>
 
-      {/* ── Footer ────────────────────────────────────────────── */}
-      <SidebarFooter />
+      {/* ── Footer ───── */}
+      <SidebarFooter onLogout={() => setShowLogoutConfirm(true)} />
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title="Sign out?"
+        message="Are you sure you want to sign out of your account?"
+        confirmLabel="Sign out"
+        onConfirm={async () => {
+          await supabase.auth.signOut();
+          router.push("/login");
+        }}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </motion.aside>
   );
 }
