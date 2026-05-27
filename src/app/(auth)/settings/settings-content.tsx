@@ -1,32 +1,48 @@
 "use client";
 
+import { useState } from "react";
 import { AnimatedPage, AnimatedGroup, AnimatedItem } from "@/components/animated-wrapper";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GlassButton } from "@/components/ui/glass-button";
-import { User, Bell, Check, Shield, Palette, ChevronRight, CreditCard } from "lucide-react";
-import { useState } from "react";
+import { User, Bell, Check, Shield, Palette, ChevronRight, CheckCircle2, CreditCard } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { SubscriptionButton } from "./subscription-button";
 import { useSubscription } from "@/hooks/use-subscription";
-import { notify } from "@/lib/notify";
 import { useNotifications } from "@/hooks/use-notifications";
 
 
-export async function SettingsContent() {
+export function SettingsContent() {
     const { displayName, refresh } = useUser();
     const { status } = useSubscription();
     const [showNameEdit, setShowNameEdit] = useState(false);
     const [newName, setNewName] = useState("");
     const [saving, setSaving] = useState(false);
     const [nameError, setNameError] = useState("");
-    const { data: { user } } = await supabase.auth.getUser();
     const { unreadCount, markAllAsRead } = useNotifications();
+    const [resetting, setResetting] = useState(false);
+    const [resetSent, setResetSent] = useState(false);
+    const [resetError, setResetError] = useState("");
 
-
-    if (user) {
-        await notify(user.id, "Profile updated", `Your display name is now "${newName.trim()}".`, "profile");
-    }
+    const handleResetPassword = async () => {
+        setResetting(true);
+        setResetError("");
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user?.email) {
+            setResetError("No email found.");
+            setResetting(false);
+            return;
+        }
+        const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+            redirectTo: `${window.location.origin}/auth/callback`,
+        });
+        if (error) {
+            setResetError(error.message);
+        } else {
+            setResetSent(true);
+        }
+        setResetting(false);
+    };
 
     return (
         <AnimatedPage>
@@ -196,9 +212,37 @@ export async function SettingsContent() {
                             )}
                         </GlassCard>
 
+                        {/* ── Security Card ── */}
+
+                        <GlassCard visual="default" padding="md" className="flex items-center gap-4">
+                            <div
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                style={{
+                                    background: "rgba(var(--glass-bg-rgb) / 0.1)",
+                                    border: "1px solid rgba(var(--glass-border-rgb) / 0.15)",
+                                    color: "var(--accent-cyan)",
+                                }}
+                            >
+                                <Shield size={18} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Security</h3>
+                                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                                    {resetSent ? "Check your email for a reset link." : "Change your password or enable 2FA."}
+                                </p>
+                                {resetError && <p className="text-red-400 text-xs mt-1">{resetError}</p>}
+                            </div>
+                            {!resetSent ? (
+                                <GlassButton variant="ghost" size="xs" loading={resetting} onClick={() => void handleResetPassword()}>
+                                    Reset password
+                                </GlassButton>
+                            ) : (
+                                <CheckCircle2 size={20} style={{ color: "var(--status-success)" }} />
+                            )}
+                        </GlassCard>
+
                         {/* ── Other cards ── */}
                         {[
-                            { icon: Shield, title: "Security", desc: "Manage your password and two‑factor authentication.", action: "Manage" },
                             { icon: Palette, title: "Appearance", desc: "Choose between dark, light, and system themes.", action: "Customise" },
                         ].map((s) => {
                             const Icon = s.icon;

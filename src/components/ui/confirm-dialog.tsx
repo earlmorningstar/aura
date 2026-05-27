@@ -61,17 +61,18 @@ export function ConfirmDialog({
                         </div>
                         <p className="text-sm text-white/60 mb-6">{message}</p>
                         <div className="flex gap-3 justify-end">
-                            <GlassButton variant="ghost" size="sm" onClick={onCancel}>
+                            <button
+                                onClick={onCancel}
+                                className="rounded-xl px-4 py-2 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
+                            >
                                 Cancel
-                            </GlassButton>
-                            <GlassButton
-                                variant="primary"
-                                size="sm"
+                            </button>
+                            <button
                                 onClick={onConfirm}
-                                className="bg-red-500 hover:bg-red-600 border-red-500"
+                                className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
                             >
                                 {confirmLabel}
-                            </GlassButton>
+                            </button>
                         </div>
                     </motion.div>
                 </motion.div>

@@ -12,7 +12,10 @@
  * - OverviewPageContent owns all data fetching via React Query hooks
  */
 
-import * as React from "react";
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
+import { Suspense } from "react";
 import { motion } from "framer-motion";
 import {
   AnimatedWrapper,
@@ -102,20 +105,61 @@ function PageHeader() {
   );
 }
 
+/* ─── Post‑checkout sync ────────── */
+
+function PostCheckoutSync() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    if (!sessionId) return;
+
+    async function sync() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const res = await fetch("/api/sync-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("session_id");
+        router.replace(url.pathname + url.search);
+      }
+    }
+
+    sync();
+  }, [searchParams, router]);
+
+  return null; // invisible
+}
+
 /* ─── Page ────── */
 
 export default function DashboardPage() {
   return (
-    <AnimatedPage>
-      {/* ── Header ───── */}
-      <AnimatedWrapper variant="fadeUp" delay={0}>
-        <PageHeader />
-      </AnimatedWrapper>
+    <>
+      <AnimatedPage>
+        {/* ── Header ───── */}
+        <AnimatedWrapper variant="fadeUp" delay={0}>
+          <PageHeader />
+        </AnimatedWrapper>
 
-      {/* ── Dashboard content ───── */}
-      <div className="mt-8">
-        <OverviewPageContent />
-      </div>
-    </AnimatedPage>
+        {/* ── Dashboard content ───── */}
+        <div className="mt-8">
+          <OverviewPageContent />
+        </div>
+      </AnimatedPage>
+
+      {/* Post‑checkout sync — runs in the background */}
+      <Suspense fallback={null}>
+        <PostCheckoutSync />
+      </Suspense>
+    </>
   );
 }

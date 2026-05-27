@@ -251,7 +251,7 @@ function SidebarFooter({ onLogout }: { onLogout: () => void }) {
       >
         <Link
           href="/settings"
-          className="flex h-8 w-8 items-center justify-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60"
+          className="flex h-8 w-8 items-center justify-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60 pointer-events-auto cursor-pointer"
           style={{
             background: "rgba(var(--glass-bg-rgb) / 0.06)",
             border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
@@ -267,7 +267,7 @@ function SidebarFooter({ onLogout }: { onLogout: () => void }) {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
         onClick={onLogout}
-        className="flex h-8 w-8 items-center justify-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60"
+        className="flex h-8 w-8 items-center justify-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-aura-cyan/60 pointer-events-auto cursor-pointer"
         style={{
           background: "rgba(var(--glass-bg-rgb) / 0.06)",
           border: "1px solid rgba(var(--glass-border-rgb) / 0.08)",
@@ -292,7 +292,7 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      className="fixed bottom-6 left-6 top-6 hidden w-[var(--sidebar-width)] flex-col lg:flex"
+      className="fixed bottom-6 left-6 top-6 hidden w-[var(--sidebar-width)] flex-col lg:flex z-[100]"
       style={{
         //Four glassmorphism properties
         background: "rgba(var(--glass-bg-rgb) / var(--glass-opacity-2))",

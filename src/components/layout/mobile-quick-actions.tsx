@@ -67,6 +67,7 @@ export function MobileQuickActions() {
         {open && (
           <>
             <motion.div
+              key="mobile-backdrop"
               className="fixed inset-0 z-[44] bg-black/50 backdrop-blur-sm lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

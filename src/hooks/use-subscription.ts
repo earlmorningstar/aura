@@ -10,10 +10,7 @@ export function useSubscription() {
 
     useEffect(() => {
         async function load() {
-            const {
-                data: { user },
-            } = await supabase.auth.getUser();
-
+            const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 setLoading(false);
                 return;
@@ -26,22 +23,17 @@ export function useSubscription() {
                 .single();
 
             if (profile) {
-                const createdAt = new Date(profile.created_at).getTime();
+                const createdAt = profile.created_at
+                    ? new Date(profile.created_at).getTime()
+                    : 0;
                 const now = Date.now();
-
                 const fourteenDays = 14 * 24 * 60 * 60 * 1000;
 
-                // Actual plan value
-                const planValue =
-                    profile?.plan ??
-                    profile?.subscription_status ??
-                    "free";
-
+                const planValue = profile?.plan ?? profile?.subscription_status ?? "free";
                 setPlan(planValue);
 
-                // Free trial logic
-                if (now - createdAt < fourteenDays) {
-                    setStatus("pro");
+                if (createdAt > 0 && now - createdAt < fourteenDays) {
+                    setStatus("pro");   // active trial
                 } else {
                     setStatus(planValue);
                 }
@@ -54,9 +46,5 @@ export function useSubscription() {
         load();
     }, []);
 
-    return {
-        status,
-        plan,
-        loading,
-    };
+    return { status, plan, loading };
 }
