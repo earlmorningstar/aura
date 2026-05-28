@@ -1,13 +1,13 @@
 "use client";
 
 import { useSubscription } from "@/hooks/use-subscription";
-import { useRouter } from "next/navigation";
 
 export function SubscriptionPill() {
-    const { status, loading } = useSubscription();
-    const router = useRouter();
+    const { plan, isTrialing, loading } = useSubscription();
 
-    if (loading || status === "free") return null; // only show if pro
+    if (loading || isTrialing || plan === "free") return null;
+
+    const label = plan === "starter" ? "Starter" : plan === "pro" ? "Pro" : plan;
 
     const handleManage = async () => {
         const res = await fetch("/api/portal", {
@@ -30,9 +30,8 @@ export function SubscriptionPill() {
                 }}
                 onClick={handleManage}
             >
-                Pro
+                {label}
             </div>
-            {/* Tooltip on hover/click */}
             <div
                 className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block"
                 style={{ zIndex: 50 }}

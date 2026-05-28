@@ -14,7 +14,8 @@ import { useNotifications } from "@/hooks/use-notifications";
 
 export function SettingsContent() {
     const { displayName, refresh } = useUser();
-    const { status } = useSubscription();
+    const { plan, isTrialing } = useSubscription();
+    const isFree = plan === "free" || isTrialing;
     const [showNameEdit, setShowNameEdit] = useState(false);
     const [newName, setNewName] = useState("");
     const [saving, setSaving] = useState(false);
@@ -181,11 +182,8 @@ export function SettingsContent() {
                                 >
                                     Subscription
                                 </h3>
-                                <p
-                                    className="text-xs mt-0.5"
-                                    style={{ color: "var(--text-muted)" }}
-                                >
-                                    {status === "pro" ? "Manage your Pro plan" : "Upgrade to Pro for full access"}
+                                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                                    {isFree ? "Upgrade to Pro for full access" : "Manage your Pro plan"}
                                 </p>
                             </div>
                             <SubscriptionButton />

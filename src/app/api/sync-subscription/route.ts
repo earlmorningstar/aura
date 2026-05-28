@@ -14,7 +14,15 @@ export async function POST(req: NextRequest) {
 
         if (session.payment_status === "paid") {
             const priceId = session.line_items?.data[0]?.price?.id;
-            const plan = priceId ? (PLANS[priceId] ?? "pro") : "pro";
+
+            // Fallback if PLANS is empty
+            const safePlans = { ...PLANS };
+            if (Object.keys(safePlans).length === 0) {
+                safePlans[process.env.STRIPE_STARTER_PRICE_ID!] = "starter";
+                safePlans[process.env.STRIPE_PRO_PRICE_ID!] = "pro";
+            }
+
+            const plan = priceId ? (safePlans[priceId] ?? "pro") : "pro";
 
             await supabase.from("profiles").upsert({
                 id: user.id,
@@ -24,9 +32,11 @@ export async function POST(req: NextRequest) {
                 stripe_customer_id: session.customer as string,
                 updated_at: new Date().toISOString(),
             }, { onConflict: "id" });
+
+            return NextResponse.json({ success: true, plan });
         }
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, plan: "free" });
     } catch (err) {
         console.error("[sync-subscription] Error:", err);
         return NextResponse.json({ error: "Failed to sync" }, { status: 500 });

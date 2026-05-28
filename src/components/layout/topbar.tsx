@@ -13,9 +13,8 @@
  *
  */
 
-import * as React from "react";
 import { motion } from "framer-motion";
-import { Bell, Sparkles, ChevronDown } from "lucide-react";
+import { Sparkles, ChevronDown } from "lucide-react";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { GlassButton } from "@/components/ui/glass-button";
 import { useUIStore } from "@/stores/ui-store";

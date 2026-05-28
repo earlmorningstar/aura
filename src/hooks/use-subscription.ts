@@ -1,20 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 
 export function useSubscription() {
-    const [status, setStatus] = useState<string | null>(null);
-    const [plan, setPlan] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function load() {
+    const { data, isLoading } = useQuery({
+        queryKey: ["subscription"],
+        queryFn: async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                setLoading(false);
-                return;
-            }
+            if (!user) return { status: "free", plan: "free", isTrialing: false };
 
             const { data: profile } = await supabase
                 .from("profiles")
@@ -22,29 +16,36 @@ export function useSubscription() {
                 .eq("id", user.id)
                 .single();
 
-            if (profile) {
-                const createdAt = profile.created_at
-                    ? new Date(profile.created_at).getTime()
-                    : 0;
-                const now = Date.now();
-                const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+            if (!profile) return { status: "free", plan: "free", isTrialing: false };
 
-                const planValue = profile?.plan ?? profile?.subscription_status ?? "free";
-                setPlan(planValue);
+            const createdAt = profile.created_at
+                ? new Date(profile.created_at).getTime()
+                : 0;
+            const now = Date.now();
+            const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+            const isTrialing = createdAt > 0 && now - createdAt < fourteenDays;
+            const plan = profile?.plan ?? profile?.subscription_status ?? "free";
 
-                if (createdAt > 0 && now - createdAt < fourteenDays) {
-                    setStatus("pro");   // active trial
-                } else {
-                    setStatus(planValue);
-                }
-            } else {
-                setStatus("free");
-                setPlan("free");
+            if (isTrialing) {
+                return { status: "pro", plan: "free", isTrialing: true };
             }
-            setLoading(false);
-        }
-        load();
-    }, []);
 
-    return { status, plan, loading };
+            return { status: plan, plan, isTrialing: false };
+        },
+        staleTime: 0,
+        refetchInterval: (query) => {
+            if (query.state.data?.status === "free") {
+                return 2000;
+            }
+            return false;
+        },
+        refetchIntervalInBackground: true,
+    });
+
+    return {
+        status: data?.status ?? "free",
+        plan: data?.plan ?? "free",
+        isTrialing: data?.isTrialing ?? false,
+        loading: isLoading,
+    };
 }

@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Suspense } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   AnimatedWrapper,
@@ -110,6 +111,7 @@ function PageHeader() {
 function PostCheckoutSync() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
@@ -127,6 +129,11 @@ function PostCheckoutSync() {
       });
 
       if (res.ok) {
+        const { plan } = await res.json();  // e.g. "starter" or "pro"
+        // Immediately tell React Query the new status
+        queryClient.setQueryData(["subscription"], { status: plan, plan });
+
+        // Then clean up the URL
         const url = new URL(window.location.href);
         url.searchParams.delete("session_id");
         router.replace(url.pathname + url.search);
@@ -134,7 +141,7 @@ function PostCheckoutSync() {
     }
 
     sync();
-  }, [searchParams, router]);
+  }, [searchParams, router, queryClient]);
 
   return null; // invisible
 }
