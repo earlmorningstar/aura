@@ -27,6 +27,7 @@ import { useUser } from "@/hooks/use-user";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useRouter } from "next/navigation";
 import { NotificationBell } from "../ui/notification-bell";
+import { SubscriptionPill } from "@/components/billing/subscription-pill";
 
 export function MobileQuickActions() {
   const router = useRouter();
@@ -120,7 +121,7 @@ export function MobileQuickActions() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">{displayName}</p>
-                      <p className="text-xs text-white/40">Pro plan</p>
+                      <SubscriptionPill />
                     </div>
 
                   </div>

@@ -34,7 +34,7 @@ export function useSubscription() {
         },
         staleTime: 0,
         refetchInterval: (query) => {
-            if (query.state.data?.status === "free") {
+            if (query.state.data?.status === "free" && !query.state.data?.isTrialing) {
                 return 2000;
             }
             return false;

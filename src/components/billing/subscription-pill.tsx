@@ -1,13 +1,23 @@
 "use client";
 
 import { useSubscription } from "@/hooks/use-subscription";
+import { useState, useEffect } from "react";
 
 export function SubscriptionPill() {
     const { plan, isTrialing, loading } = useSubscription();
+    const [label, setLabel] = useState<string | null>(null);
 
-    if (loading || isTrialing || plan === "free") return null;
+    // Update label only when we have a real plan and we're not loading
+    useEffect(() => {
+        if (!loading && !isTrialing && plan !== "free") {
+            setLabel(plan === "starter" ? "Starter" : plan === "pro" ? "Pro" : plan);
+        } else if (!loading && (isTrialing || plan === "free")) {
+            setLabel(null);
+        }
+    }, [plan, isTrialing, loading]);
 
-    const label = plan === "starter" ? "Starter" : plan === "pro" ? "Pro" : plan;
+    // If we have a label, show it even while loading (to avoid flicker)
+    if (!label) return null;
 
     const handleManage = async () => {
         const res = await fetch("/api/portal", {
@@ -32,10 +42,7 @@ export function SubscriptionPill() {
             >
                 {label}
             </div>
-            <div
-                className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block"
-                style={{ zIndex: 50 }}
-            >
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block z-50">
                 <div
                     className="rounded-lg px-3 py-1.5 text-xs whitespace-nowrap"
                     style={{
