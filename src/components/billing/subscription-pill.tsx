@@ -1,23 +1,26 @@
 "use client";
 
 import { useSubscription } from "@/hooks/use-subscription";
-import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function SubscriptionPill() {
     const { plan, isTrialing, loading } = useSubscription();
-    const [label, setLabel] = useState<string | null>(null);
+    const queryClient = useQueryClient();
 
-    // Update label only when we have a real plan and we're not loading
-    useEffect(() => {
-        if (!loading && !isTrialing && plan !== "free") {
-            setLabel(plan === "starter" ? "Starter" : plan === "pro" ? "Pro" : plan);
-        } else if (!loading && (isTrialing || plan === "free")) {
-            setLabel(null);
-        }
-    }, [plan, isTrialing, loading]);
+    // If loading, fall back to the cached data so the pill never flickers
+    const cachedData = queryClient.getQueryData<{
+        status: string;
+        plan: string;
+        isTrialing: boolean;
+    }>(["subscription"]);
 
-    // If we have a label, show it even while loading (to avoid flicker)
-    if (!label) return null;
+    const displayPlan = loading ? cachedData?.plan : plan;
+    const displayTrialing = loading ? cachedData?.isTrialing : isTrialing;
+
+    if (!displayPlan || displayPlan === "free" || displayTrialing) return null;
+
+    const label =
+        displayPlan === "starter" ? "Starter" : displayPlan === "pro" ? "Pro" : displayPlan;
 
     const handleManage = async () => {
         const res = await fetch("/api/portal", {

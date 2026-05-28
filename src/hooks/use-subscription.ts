@@ -32,14 +32,14 @@ export function useSubscription() {
 
             return { status: plan, plan, isTrialing: false };
         },
-        staleTime: 0,
+        staleTime: 5 * 60 * 1000,     // data fresh for 5 minutes
         refetchInterval: (query) => {
+            // Only poll if status is "free" and NOT in trial
             if (query.state.data?.status === "free" && !query.state.data?.isTrialing) {
-                return 2000;
+                return 10_000;   // checking every 10 seconds
             }
             return false;
         },
-        refetchIntervalInBackground: true,
     });
 
     return {
