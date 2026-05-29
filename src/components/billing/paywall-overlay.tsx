@@ -5,13 +5,7 @@ import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { GlassButton } from "@/components/ui/glass-button";
 
-interface PaywallOverlayProps {
-    onBypass?: () => void;
-}
-
-export function PaywallOverlay({
-    onBypass,
-}: PaywallOverlayProps) {
+export function PaywallOverlay() {
     const router = useRouter();
 
     return (
@@ -30,35 +24,18 @@ export function PaywallOverlay({
                 }}
                 initial={{ scale: 0.95, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
-                transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 25,
-                }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
                 <div
                     className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl"
-                    style={{
-                        background: "var(--gradient-brand)",
-                    }}
+                    style={{ background: "var(--gradient-brand)" }}
                 >
-                    <Sparkles
-                        size={30}
-                        style={{
-                            color: "var(--color-bg-void)",
-                        }}
-                    />
+                    <Sparkles size={30} style={{ color: "var(--color-bg-void)" }} />
                 </div>
-
-                <h2 className="mb-2 text-2xl font-bold text-white">
-                    Pro Trial Expired
-                </h2>
-
-                <p className="mb-8 text-white/60">
-                    Upgrade to Pro to keep accessing all features,
-                    real-time analytics, and AI-powered insights.
+                <h2 className="text-2xl font-bold text-white mb-2">Pro Trial Expired</h2>
+                <p className="text-white/60 mb-8">
+                    Upgrade to Pro to keep accessing all features, real‑time analytics, and AI‑powered insights.
                 </p>
-
                 <div className="flex flex-col gap-3">
                     <GlassButton
                         variant="primary"
@@ -68,21 +45,8 @@ export function PaywallOverlay({
                     >
                         See plans
                     </GlassButton>
-
-                    <GlassButton
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push("/dashboard")}
-                    >
+                    <GlassButton variant="ghost" size="sm" onClick={() => router.push("/dashboard")}>
                         Maybe later
-                    </GlassButton>
-
-                    <GlassButton
-                        variant="ghost"
-                        size="sm"
-                        onClick={onBypass}
-                    >
-                        Continue with limited access
                     </GlassButton>
                 </div>
             </motion.div>

@@ -820,7 +820,7 @@
 .delay-700 { animation-delay: 700ms; }
 .delay-800 { animation-delay: 800ms; }
 
-
+/* For Light Theme */
 .light {
   --color-bg-void: #ffffff;
   --color-bg-raised: #f8fafc;

@@ -31,13 +31,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useWorkspaceStore } from "@/stores/workspace-store"
 import { useUser } from "@/hooks/use-user";
 import { notify } from "@/lib/notify";
+import { useOverviewData } from "@/hooks/use-overview-data";
 
 const RevenueTrendChart = dynamic(
   () => import("@/components/charts/revenue-trend-chart").then(mod => mod.RevenueTrendChart),
   { loading: () => <SkeletonChart heightClass="h-[260px]" />, ssr: false }
 );
 
-/* ─── Section label ──────────────────────────────────────────────── */
+/*  Section label  */
 
 interface SectionHeaderProps {
   title: string;
@@ -74,7 +75,7 @@ function SectionHeader({ title, subtitle, action }: SectionHeaderProps) {
   );
 }
 
-/* ─── Error state ────────────────────────────────────────────────── */
+/*  Error state  */
 
 interface DashboardErrorProps {
   message?: string;
@@ -129,7 +130,7 @@ function DashboardError({
   );
 }
 
-/* ─── Quick stats row (bottom) ───────────────────────────────────── */
+/*  Quick stats row (bottom)  */
 
 function QuickStatsRow() {
   const { transactions } = useRevenue();
@@ -190,7 +191,7 @@ function QuickStatsRow() {
   );
 }
 
-/* ─── OverviewPageContent ────────────────────────────────────────── */
+/*  OverviewPageContent  */
 
 export function OverviewPageContent() {
   const { startDate, endDate } = useDateRangeStore();
@@ -201,6 +202,7 @@ export function OverviewPageContent() {
   const queryClient = useQueryClient();
   const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
   const { userId, displayName } = useUser();
+  const overview = useOverviewData();
 
   useEffect(() => {
     if (!userId) return;
@@ -233,7 +235,7 @@ export function OverviewPageContent() {
 
   return (
     <AnimatedGroup stagger={0.08} delayChildren={0.1}>
-      {/* ── Section 1: KPI cards ─────────────────────────────── */}
+      {/*  Section 1: KPI cards  */}
       <AnimatedItem variant="fadeUp">
         <SectionHeader
           title="Key Metrics"
@@ -242,7 +244,7 @@ export function OverviewPageContent() {
         <KPIGrid />
       </AnimatedItem>
 
-      {/* ── Section 2: Revenue trend + AI summary ────────────── */}
+      {/*  Section 2: Revenue trend + AI summary  */}
       <AnimatedItem variant="fadeUp">
         <div className="mt-8">
           <SectionHeader
@@ -257,13 +259,14 @@ export function OverviewPageContent() {
 
             {/* AI summary — spans 4/12 on desktop */}
             <div className="lg:col-span-4">
-              <AISummaryCard />
+              <AISummaryCard summaryText={overview.aiSummary}
+                actions={overview.actions} />
             </div>
           </div>
         </div>
       </AnimatedItem>
 
-      {/* ── Section 3: Quick stats strip ─────────────────────── */}
+      {/*  Section 3: Quick stats strip  */}
       <AnimatedItem variant="fadeUp">
         <div className="mt-8">
           <SectionHeader

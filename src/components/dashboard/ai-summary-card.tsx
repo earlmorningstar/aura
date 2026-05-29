@@ -29,7 +29,7 @@ import { SkeletonText } from "@/components/ui/loading-skeleton";
 import { useAISummary } from "@/hooks/use-ai-summary";
 import { cn } from "@/lib/utils";
 
-/* ─── Typewriter text ────────────────────────────────────────────── */
+/* Typewriter text */
 
 interface TypewriterProps {
   text: string;
@@ -87,7 +87,7 @@ function TypewriterText({
   );
 }
 
-/* ─── Animated Sparkles icon ─────────────────────────────────────── */
+/* Animated Sparkles icon */
 
 function SparklesIcon({ spinning }: { spinning?: boolean }) {
   return (
@@ -113,7 +113,7 @@ function SparklesIcon({ spinning }: { spinning?: boolean }) {
   );
 }
 
-/* ─── Action chip ────────────────────────────────────────────────── */
+/* Action chip  */
 
 interface ActionChipProps {
   label: string;
@@ -156,7 +156,7 @@ function ActionChip({ label, onClick, index = 0 }: ActionChipProps) {
   );
 }
 
-/* ─── Loading skeleton ───────────────────────────────────────────── */
+/* Loading skeleton  */
 
 function AISummarySkeleton() {
   return (
@@ -181,7 +181,7 @@ function AISummarySkeleton() {
   );
 }
 
-/* ─── Full error card (when NO summary exists) ──────────────────── */
+/*  Full error card (when NO summary exists)  */
 
 function AISummaryFullError({ onRetry }: { onRetry: () => void }) {
   return (
@@ -222,7 +222,7 @@ function AISummaryFullError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-/* ─── Timestamp ──────────────────────────────────────────────────── */
+/* Timestamp  */
 
 function Timestamp({ isoString }: { isoString?: string }) {
   if (!isoString) return null;
@@ -246,7 +246,7 @@ function Timestamp({ isoString }: { isoString?: string }) {
   );
 }
 
-/* ─── AISummaryCard ──────────────────────────────────────────────── */
+/* AISummaryCard */
 
 /** Fallback content until the real API responds */
 const FALLBACK_SUMMARY =
@@ -258,7 +258,12 @@ const FALLBACK_ACTIONS = [
   "Review top earners",
 ];
 
-export function AISummaryCard() {
+interface AISummaryCardProps {
+  summaryText?: string;
+  actions?: string[];
+}
+
+export function AISummaryCard({ summaryText, actions }: AISummaryCardProps) {
   const { data, isLoading, isError, refetch, isFetching } = useAISummary();
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
@@ -279,8 +284,8 @@ export function AISummaryCard() {
   }
 
   // Always use what we have (fallback if no real data yet)
-  const summaryText = data?.aiSummary ?? FALLBACK_SUMMARY;
-  const actions: string[] = data?.actions ?? FALLBACK_ACTIONS;
+  const safeSummary = summaryText ?? FALLBACK_SUMMARY;
+  const safeActions = actions ?? FALLBACK_ACTIONS;
   const updatedAt: string | undefined = data?.updatedAt;
 
   return (
@@ -289,7 +294,7 @@ export function AISummaryCard() {
       padding="none"
       className="flex h-full flex-col p-3 md:p-5 lg:p-6"
     >
-      {/* ── Header ──────────────────────────────────────────── */}
+      {/* Header  */}
       <div className="mb-6 flex items-start justify-between gap-4">
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
@@ -340,10 +345,10 @@ export function AISummaryCard() {
         </div>
       </div>
 
-      {/* ── Summary text ────────────────────────────────────── */}
+      {/* Summary text */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={summaryText.slice(0, 20)}
+          key={safeSummary.slice(0, 20)}
           className="flex-1"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -354,12 +359,12 @@ export function AISummaryCard() {
             className="max-w-[65ch] text-sm leading-relaxed tracking-[0.01em]"
             style={{ color: "var(--text-secondary)" }}
           >
-            <TypewriterText text={summaryText} speed={14} delay={0.2} />
+            <TypewriterText text={safeSummary} speed={14} delay={0.2} />
           </p>
         </motion.div>
       </AnimatePresence>
 
-      {/* ── Inline error banner (only when error occurs but data exists) ── */}
+      {/* Inline error banner (only when error occurs but data exists) ── */}
       {isError && (
         <div
           className="mt-3 flex items-center justify-between rounded-lg px-3 py-2 text-xs"
@@ -379,7 +384,7 @@ export function AISummaryCard() {
         </div>
       )}
 
-      {/* ── Divider ─────────────────────────────────────────── */}
+      {/* Divider */}
       <motion.div
         className="my-4 h-px"
         style={{
@@ -391,9 +396,9 @@ export function AISummaryCard() {
         transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
       />
 
-      {/* ── Action chips ────────────────────────────────────── */}
+      {/* Action chips  */}
       <div className="flex flex-wrap gap-2">
-        {actions.map((action, i) => (
+        {safeActions.map((action, i) => (
           <ActionChip key={action} label={action} index={i} />
         ))}
       </div>
