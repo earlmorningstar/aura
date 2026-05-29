@@ -1,21 +1,3 @@
-// "use client";
-
-// import * as React from "react";
-// import { ThemeProvider as NextThemesProvider } from "next-themes";
-
-// export function ThemeProvider({ children }: { children: React.ReactNode }) {
-//   return (
-//     <NextThemesProvider
-//       attribute="class"
-//       defaultTheme="dark"
-//       enableSystem={false}
-//       disableTransitionOnChange
-//     >
-//       {children}
-//     </NextThemesProvider>
-//   );
-// }
-
 "use client";
 
 /**
@@ -45,10 +27,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     <NextThemesProvider
       attribute="class"
       defaultTheme="dark"
-      forcedTheme="dark"   // Lock to dark — Aura is dark-only
+      forcedTheme="dark"   // Aura is dark-only
       enableSystem={false}
       storageKey="aura-theme"
-      // DO NOT set disableTransitionOnChange — keep CSS transitions active
+    //NOT setting disableTransitionOnChange — keep CSS transitions active
     >
       {children}
     </NextThemesProvider>

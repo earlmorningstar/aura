@@ -11,7 +11,6 @@ import { SubscriptionButton } from "./subscription-button";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useNotifications } from "@/hooks/use-notifications";
 
-
 export function SettingsContent() {
     const { displayName, refresh } = useUser();
     const { plan, isTrialing } = useSubscription();
@@ -240,32 +239,25 @@ export function SettingsContent() {
                         </GlassCard>
 
                         {/* ── Other cards ── */}
-                        {[
-                            { icon: Palette, title: "Appearance", desc: "Choose between dark, light, and system themes.", action: "Customise" },
-                        ].map((s) => {
-                            const Icon = s.icon;
-                            return (
-                                <GlassCard key={s.title} visual="default" padding="md" className="flex items-center gap-4">
-                                    <div
-                                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                                        style={{
-                                            background: "rgba(var(--glass-bg-rgb) / 0.1)",
-                                            border: "1px solid rgba(var(--glass-border-rgb) / 0.15)",
-                                            color: "var(--accent-cyan)",
-                                        }}
-                                    >
-                                        <Icon size={18} />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{s.title}</h3>
-                                        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{s.desc}</p>
-                                    </div>
-                                    <GlassButton variant="ghost" size="xs" trailingIcon={<ChevronRight size={14} />}>
-                                        {s.action}
-                                    </GlassButton>
-                                </GlassCard>
-                            );
-                        })}
+                        <GlassCard visual="default" padding="md" className="flex items-center gap-4">
+                            <div
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                style={{
+                                    background: "rgba(var(--glass-bg-rgb) / 0.1)",
+                                    border: "1px solid rgba(var(--glass-border-rgb) / 0.15)",
+                                    color: "var(--accent-cyan)",
+                                }}
+                            >
+                                <Palette size={18} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Appearance</h3>
+                                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Dark mode is the Aura standard. Custom themes coming later.</p>
+                            </div>
+                            <GlassButton variant="ghost" size="xs" disabled>
+                                Soon
+                            </GlassButton>
+                        </GlassCard>
                     </div>
                 </AnimatedItem>
             </AnimatedGroup>

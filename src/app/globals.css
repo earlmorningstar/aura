@@ -820,6 +820,29 @@
 .delay-700 { animation-delay: 700ms; }
 .delay-800 { animation-delay: 800ms; }
 
+
+.light {
+  --color-bg-void: #ffffff;
+  --color-bg-raised: #f8fafc;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+  --glass-bg-rgb: 255, 255, 255;
+  --glass-border-rgb: 0, 0, 0;
+  --glass-opacity-2: 0.6;
+  --glass-opacity-3: 0.8;
+  --glass-border-opacity: 0.12;
+  --glass-border-opacity-strong: 0.18;
+  --accent-cyan: #0284c7;
+  --accent-purple: #7c3aed;
+  --status-success: #16a34a;
+  --status-error: #dc2626;
+  --status-warning: #f59e0b;
+  --accent-amber: #d97706;
+  --accent-pink: #db2777;
+}
+
 /* ─── Reduced motion ────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,

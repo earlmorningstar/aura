@@ -12,7 +12,7 @@ export function useSubscription() {
 
             const { data: profile } = await supabase
                 .from("profiles")
-                .select("subscription_status, plan, created_at")
+                .select("plan, created_at")
                 .eq("id", user.id)
                 .single();
 
@@ -24,19 +24,20 @@ export function useSubscription() {
             const now = Date.now();
             const fourteenDays = 14 * 24 * 60 * 60 * 1000;
             const isTrialing = createdAt > 0 && now - createdAt < fourteenDays;
-            const plan = profile?.plan ?? profile?.subscription_status ?? "free";
+            const plan = profile.plan ?? "free";
 
             if (isTrialing) {
+                // Trial overrides everything – treat as Pro temporarily
                 return { status: "pro", plan: "free", isTrialing: true };
             }
 
+            // Real plan: "starter", "pro", or "free"
             return { status: plan, plan, isTrialing: false };
         },
-        staleTime: 5 * 60 * 1000,     // data fresh for 5 minutes
+        staleTime: 5 * 60 * 1000,
         refetchInterval: (query) => {
-            // Only poll if status is "free" and NOT in trial
             if (query.state.data?.status === "free" && !query.state.data?.isTrialing) {
-                return 10_000;   // checking every 10 seconds
+                return 10_000;
             }
             return false;
         },

@@ -4,7 +4,7 @@
  * Dashboard Overview Page — /
  *
  * This is the root authenticated page. Layout chrome (Sidebar, Topbar,
- * MobileNav) is rendered in app/layout.tsx — do NOT import them here.
+ * MobileNav) is rendered in app/layout.tsx.
  *
  * Architecture:
  * - Client component so Framer Motion entrance animations work on first paint
@@ -129,11 +129,9 @@ function PostCheckoutSync() {
       });
 
       if (res.ok) {
-        const { plan } = await res.json();  // e.g. "starter" or "pro"
-        // Immediately tell React Query the new status
+        const { plan } = await res.json();  //"starter" or "pro"
         queryClient.setQueryData(["subscription"], { status: plan, plan });
 
-        // Then clean up the URL
         const url = new URL(window.location.href);
         url.searchParams.delete("session_id");
         router.replace(url.pathname + url.search);
