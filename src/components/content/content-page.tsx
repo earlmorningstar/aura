@@ -39,7 +39,7 @@ import { useContentPieces } from "@/hooks/use-content-pieces";
 import { useState } from "react";
 import { Toast } from "@/components/ui/toast";
 
-/* ─── Minimal “Add Content” Modal ────────────────────────────────── */
+/* Minimal “Add Content” Modal */
 
 type ContentType = "post" | "video" | "newsletter";
 
@@ -307,7 +307,7 @@ function AddContentModal({ open, onClose, onSave }: AddContentModalProps) {
 }
 
 
-/* ─── Sort / filter bar ────────────────── */
+/* Sort / filter bar */
 
 type SortOption = "revenue" | "engagement" | "views" | "recent";
 type PlatformFilter = "all" | "YouTube" | "Newsletter" | "Twitter/X" | "Blog";
@@ -466,11 +466,11 @@ function ContentFilterBar({
   );
 }
 
-/* ─── Publishing cadence heatmap ─────────────────────── */
+/* Publishing cadence heatmap */
 
 
 function RealPublishingHeatmap() {
-  const { pieces } = useContentPieces();
+  const { pieces, isLoading, addPiece } = useContentPieces();
   const today = new Date();
   const start = subWeeks(today, 11); // last 12 weeks
   const allDays = eachDayOfInterval({ start, end: today });
@@ -533,7 +533,7 @@ function RealPublishingHeatmap() {
 }
 
 
-/* ─── ContentPage ────────────────────────────────────────────────── */
+/* ContentPage */
 
 export function ContentPage() {
   const { pieces, isLoading, addPiece } = useContentPieces();
@@ -592,7 +592,7 @@ export function ContentPage() {
   return (
     <AnimatedPage>
       <AnimatedGroup stagger={0.1} delayChildren={0.05} className="flex flex-col gap-6">
-        {/* ── Section 1: Header ───────────────────────────────── */}
+        {/* Section 1: Header */}
         <AnimatedItem variant="fadeUp">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -621,7 +621,7 @@ export function ContentPage() {
           </div>
         </AnimatedItem>
 
-        {/* ── Section 2: KPI strip ── */}
+        {/* Section 2: KPI strip */}
         <AnimatedItem variant="fadeUp">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             <GlassKPI
@@ -683,7 +683,7 @@ export function ContentPage() {
           </div>
         </AnimatedItem>
 
-        {/* ── Section 3: Filter bar + Cards ─────────────────── */}
+        {/* Section 3: Filter bar + Cards */}
         <AnimatedItem variant="fadeUp">
           <div className="flex flex-col gap-5">
             <ContentFilterBar
@@ -708,20 +708,43 @@ export function ContentPage() {
           </div>
         </AnimatedItem>
 
-        {/* ── Section 4: Publishing heatmap ─────────────────── */}
+        {/* Section 4: Publishing heatmap */}
         <AnimatedItem variant="fadeUp">
-          <RealPublishingHeatmap />
+          {isLoading ? (
+            <GlassCard visual="default" padding="md">
+              <div className="animate-pulse">
+                <div className="h-5 w-32 rounded bg-white/10 mb-4" />
+                <div className="flex gap-3">
+                  <div className="flex flex-col gap-1 pt-5">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
+                      <div key={d} className="h-3 w-5 rounded bg-white/10" />
+                    ))}
+                  </div>
+                  <div className="flex gap-1">
+                    {Array.from({ length: 12 }).map((_, w) => (
+                      <div key={w} className="flex flex-col gap-1">
+                        {Array.from({ length: 7 }).map((_, d) => (
+                          <div key={d} className="h-3 w-3 rounded-sm bg-white/10" />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+          ) : (
+            <RealPublishingHeatmap />)}
         </AnimatedItem>
       </AnimatedGroup>
 
-      {/* ── Modal ────────────────────────────────────────────── */}
+      {/* Modal */}
       <AddContentModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleAddPiece}
       />
 
-      {/* ── Success toast ────────────────────────────────────── */}
+      {/* Success toast */}
       <Toast
         show={showToast}
         message="Content added successfully"

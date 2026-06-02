@@ -46,7 +46,7 @@ const AudienceGrowthChart = dynamic(
   { loading: () => <SkeletonChart heightClass="h-[300px]" />, ssr: false }
 );
 
-/* ─── Platform card ──────────────────────────────────────────────── */
+/* Platform card */
 
 interface PlatformCardProps {
   icon: React.ElementType;
@@ -81,7 +81,7 @@ function PlatformCard({
       transition={{ type: "spring", stiffness: 280, damping: 26, delay }}
     >
       <GlassCard visual="default" padding="md" className="flex h-full flex-col gap-4">
-        {/* ── Header ──────────────────────────────────────────── */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -114,7 +114,7 @@ function PlatformCard({
           </span>
         </div>
 
-        {/* ── Follower count ────────────────────────────────── */}
+        {/* Follower count */}
         <div>
           <p className="tracking-caps" style={{ color: "var(--text-muted)" }}>
             Followers
@@ -127,7 +127,7 @@ function PlatformCard({
           </p>
         </div>
 
-        {/* ── Stats row ────────────────────────────────────────── */}
+        {/* Stats row */}
         <div className="flex items-center gap-4">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
@@ -152,14 +152,14 @@ function PlatformCard({
           </div>
         </div>
 
-        {/* ── Sparkline ────────────────────────────────────────── */}
+        {/* Sparkline */}
         <Sparkline trend={trend} width={120} height={28} />
       </GlassCard>
     </motion.div>
   );
 }
 
-/* ─── Top content row ─────────────────────────────────────────────── */
+/* Top content row */
 
 interface TopContentRowProps {
   title: string;
@@ -213,7 +213,7 @@ function TopContentRow({ title, platform, views, newFollowers, index }: TopConte
   );
 }
 
-/* ─── Derive UI shape from audience records ────────────────────── */
+/* Derive UI shape from audience records */
 
 type TopContentItem = {
   title: string;
@@ -299,7 +299,7 @@ function deriveFromRecords(records: AudienceRecord[]) {
   };
 }
 
-/* ─── AudiencePage ───────────────────────────────────────────────── */
+/* AudiencePage */
 
 export function AudiencePage() {
   const { data: records, isLoading, refetch } = useAudienceData();
@@ -310,7 +310,7 @@ export function AudiencePage() {
     <AnimatedPage>
       <AnimatedGroup stagger={0.1} delayChildren={0.05} className="flex flex-col gap-6">
 
-        {/* ── Section 1: Header ───────────────────────────────── */}
+        {/* Section 1: Header */}
         <AnimatedItem variant="fadeUp">
           <div>
             <h1
@@ -329,7 +329,7 @@ export function AudiencePage() {
           </div>
         </AnimatedItem>
 
-        {/* ── Section 2: Summary KPIs ──────────────────────────── */}
+        {/* Section 2: Summary KPIs */}
         <AnimatedItem variant="fadeUp">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {(() => {
@@ -372,7 +372,7 @@ export function AudiencePage() {
           Add Data
         </GlassButton>
 
-        {/* ── Section 3: Growth chart ──────────────────────────── */}
+        {/* Section 3: Growth chart */}
         <AnimatedItem variant="fadeUp">
           <AudienceGrowthChart
             data={ui.growthData}
@@ -386,7 +386,7 @@ export function AudiencePage() {
           />
         </AnimatedItem>
 
-        {/* ── Section 4: Platform breakdown ───────────────────── */}
+        {/* Section 4: Platform breakdown */}
         <AnimatedItem variant="fadeUp">
           <div>
             <h2
@@ -415,7 +415,7 @@ export function AudiencePage() {
           </div>
         </AnimatedItem>
 
-        {/* ── Section 5: Top audience-driving content ──────────── */}
+        {/* Section 5: Top audience-driving content  */}
         <AnimatedItem variant="fadeUp">
           <GlassCard visual="default" padding="md">
             <h2

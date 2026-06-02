@@ -3,23 +3,22 @@
 import { motion } from "framer-motion";
 import { useUser } from "@/hooks/use-user";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { useDateRangeStore, type DatePreset } from "@/stores/date-range-store";
 import { SubscriptionPill } from "@/components/billing/subscription-pill";
-import { usePathname } from "next/navigation";
+// import { useDateRangeStore, type DatePreset } from "@/stores/date-range-store";
+// import { usePathname } from "next/navigation";
 
-const PRESETS: { label: string; value: DatePreset }[] = [
-    { label: "7D", value: "7d" },
-    { label: "30D", value: "30d" },
-    { label: "90D", value: "90d" },
-    { label: "1Y", value: "1y" },
-];
+// const PRESETS: { label: string; value: DatePreset }[] = [
+//     { label: "7D", value: "7d" },
+//     { label: "30D", value: "30d" },
+//     { label: "90D", value: "90d" },
+//     { label: "1Y", value: "1y" },
+// ];
 
 export function MobileDashboardHeader() {
     const { displayName, initials } = useUser();
     const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
-    const { preset, setPreset } = useDateRangeStore();
-    const pathname = usePathname();
-    const isOverview = pathname === "/dashboard";
+    // const { preset, setPreset } = useDateRangeStore();
+    // const pathname = usePathname();
 
     // Capitalise workspace name
     const wsName = currentWorkspace
@@ -94,26 +93,6 @@ export function MobileDashboardHeader() {
                         />
                         {wsName}
                     </div>
-
-                    {/* Quick date pills */}
-                    {/* {isOverview && (
-                        <div className="flex items-center gap-0.5 rounded-lg p-0.5" style={{ background: "rgba(var(--glass-bg-rgb) / 0.05)" }}>
-                            {PRESETS.map((p) => (
-                                <button
-                                    key={p.value}
-                                    className="rounded-md px-1.5 py-0.5 text-[10px] max-[520px]:text-[8px] font-medium"
-                                    style={{
-                                        background: preset === p.value ? "rgba(var(--glass-bg-rgb) / 0.15)" : "transparent",
-                                        color: preset === p.value ? "var(--text-primary)" : "var(--text-tertiary)",
-                                    }}
-                                    onClick={() => setPreset(p.value)}
-                                >
-                                    {p.label}
-                                </button>
-                            ))}
-                        </div>
-                    )} */}
-
                 </div>
             </div>
         </motion.div>
