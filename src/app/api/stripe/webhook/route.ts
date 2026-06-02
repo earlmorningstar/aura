@@ -1,9 +1,3 @@
-/**
- * POST /api/stripe/webhook
- *
- * Handles Stripe webhook events for subscription lifecycle management.
- */
-
 import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
@@ -37,16 +31,26 @@ export async function POST(req: NextRequest) {
         const userId = session.metadata?.user_id;
         if (!userId) break;
 
-        // Getting price ID from the first line item
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
         const priceId = lineItems.data[0]?.price?.id;
         const plan = priceId ? (PLANS[priceId] ?? "pro") : "pro";
+
+        let paidUntil: string | null = null;
+        if (session.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(
+            session.subscription as string
+          );
+          paidUntil = subscription.items.data[0]?.current_period_end
+            ? new Date(subscription.items.data[0].current_period_end * 1000).toISOString()
+            : null;
+        }
 
         await supabase.from("profiles").upsert({
           id: userId,
           subscription_status: plan,
           plan,
           stripe_customer_id: session.customer as string,
+          paid_until: paidUntil,
           updated_at: new Date().toISOString(),
         }, { onConflict: "id" });
         break;
@@ -56,7 +60,12 @@ export async function POST(req: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
         await supabase.from("profiles")
-          .update({ subscription_status: "free", updated_at: new Date().toISOString() })
+          .update({
+            subscription_status: "free",
+            plan: "free",
+            paid_until: null,
+            updated_at: new Date().toISOString(),
+          })
           .eq("stripe_customer_id", customerId);
         break;
       }
@@ -64,26 +73,29 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
-        const status = subscription.status; // active|past_due|trialing/etc.
+        const status = subscription.status;
 
-        // Only change to "free" if the subscription is truly ended
         if (status === "canceled" || status === "unpaid" || status === "incomplete_expired") {
           await supabase.from("profiles")
             .update({
               subscription_status: "free",
               plan: "free",
-              updated_at: new Date().toISOString()
+              paid_until: null,
+              updated_at: new Date().toISOString(),
             })
             .eq("stripe_customer_id", customerId);
         } else {
-          // Active or trialing
           const priceId = subscription.items.data[0]?.price?.id;
           const plan = priceId ? (PLANS[priceId] ?? "pro") : "pro";
+          const paidUntil = subscription.items.data[0]?.current_period_end
+            ? new Date(subscription.items.data[0].current_period_end * 1000).toISOString()
+            : null;
           await supabase.from("profiles")
             .update({
               subscription_status: plan,
               plan,
-              updated_at: new Date().toISOString()
+              paid_until: paidUntil,
+              updated_at: new Date().toISOString(),
             })
             .eq("stripe_customer_id", customerId);
         }

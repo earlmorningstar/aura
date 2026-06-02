@@ -12,7 +12,7 @@ export function useSubscription() {
 
             const { data: profile } = await supabase
                 .from("profiles")
-                .select("plan, created_at")
+                .select("plan, created_at, paid_until")
                 .eq("id", user.id)
                 .single();
 
@@ -24,21 +24,28 @@ export function useSubscription() {
             const now = Date.now();
             const fourteenDays = 14 * 24 * 60 * 60 * 1000;
             const isTrialing = createdAt > 0 && now - createdAt < fourteenDays;
-            const plan = profile.plan ?? "free";
 
+            // If the user has a real paid plan and paid_until is still in the future
+            if (profile.plan && profile.plan !== "free" && profile.paid_until) {
+                const paidUntil = new Date(profile.paid_until).getTime();
+                if (paidUntil > now) {
+                    return { status: profile.plan, plan: profile.plan, isTrialing: false };
+                }
+                // Paid period expired – fall back to free
+                return { status: "free", plan: "free", isTrialing: false };
+            }
+
+            // Trial logic
             if (isTrialing) {
-                // Trial overrides everything – treat as Pro temporarily
                 return { status: "pro", plan: "free", isTrialing: true };
             }
 
-            // Real plan: "starter", "pro", or "free"
-            return { status: plan, plan, isTrialing: false };
+            return { status: "free", plan: "free", isTrialing: false };
         },
         staleTime: 5 * 60 * 1000,
         refetchInterval: (query) => {
-            if (query.state.data?.status === "free" && !query.state.data?.isTrialing) {
-                return 10_000;
-            }
+            // Only refetch if currently free (to catch new payments)
+            if (query.state.data?.status === "free") return 10_000;
             return false;
         },
     });

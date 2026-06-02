@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
         if (session.payment_status === "paid") {
             const priceId = session.line_items?.data[0]?.price?.id;
 
-            // Fallback if PLANS is empty
             const safePlans = { ...PLANS };
             if (Object.keys(safePlans).length === 0) {
                 safePlans[process.env.STRIPE_STARTER_PRICE_ID!] = "starter";
@@ -24,12 +23,24 @@ export async function POST(req: NextRequest) {
 
             const plan = priceId ? (safePlans[priceId] ?? "pro") : "pro";
 
+            let paidUntil: string | null = null;
+            if (session.subscription) {
+                // `.data` is the actual subscription object
+                const subscription = await stripe.subscriptions.retrieve(
+                    session.subscription as string
+                );
+                paidUntil = subscription.items.data[0]?.current_period_end
+                    ? new Date(subscription.items.data[0].current_period_end * 1000).toISOString()
+                    : null;
+            }
+
             await supabase.from("profiles").upsert({
                 id: user.id,
                 email: user.email,
                 subscription_status: plan,
                 plan,
                 stripe_customer_id: session.customer as string,
+                paid_until: paidUntil,
                 updated_at: new Date().toISOString(),
             }, { onConflict: "id" });
 
