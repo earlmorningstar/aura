@@ -5,6 +5,7 @@ import { useUser } from "@/hooks/use-user";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useDateRangeStore, type DatePreset } from "@/stores/date-range-store";
 import { SubscriptionPill } from "@/components/billing/subscription-pill";
+import { usePathname } from "next/navigation";
 
 const PRESETS: { label: string; value: DatePreset }[] = [
     { label: "7D", value: "7d" },
@@ -17,6 +18,8 @@ export function MobileDashboardHeader() {
     const { displayName, initials } = useUser();
     const currentWorkspace = useWorkspaceStore((s) => s.currentWorkspace);
     const { preset, setPreset } = useDateRangeStore();
+    const pathname = usePathname();
+    const isOverview = pathname === "/dashboard";
 
     // Capitalise workspace name
     const wsName = currentWorkspace
@@ -78,7 +81,7 @@ export function MobileDashboardHeader() {
                     <SubscriptionPill />
                     {/* Workspace pill */}
                     <div
-                        className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"
+                        className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] max-[520px]:text-[9px] font-medium"
                         style={{
                             background: "rgba(var(--glass-bg-rgb) / 0.1)",
                             border: "1px solid rgba(var(--glass-border-rgb) / 0.12)",
@@ -93,21 +96,24 @@ export function MobileDashboardHeader() {
                     </div>
 
                     {/* Quick date pills */}
-                    <div className="flex items-center gap-0.5 rounded-lg p-0.5" style={{ background: "rgba(var(--glass-bg-rgb) / 0.05)" }}>
-                        {PRESETS.map((p) => (
-                            <button
-                                key={p.value}
-                                className="rounded-md px-1.5 py-0.5 text-[10px] font-medium"
-                                style={{
-                                    background: preset === p.value ? "rgba(var(--glass-bg-rgb) / 0.15)" : "transparent",
-                                    color: preset === p.value ? "var(--text-primary)" : "var(--text-tertiary)",
-                                }}
-                                onClick={() => setPreset(p.value)}
-                            >
-                                {p.label}
-                            </button>
-                        ))}
-                    </div>
+                    {isOverview && (
+                        <div className="flex items-center gap-0.5 rounded-lg p-0.5" style={{ background: "rgba(var(--glass-bg-rgb) / 0.05)" }}>
+                            {PRESETS.map((p) => (
+                                <button
+                                    key={p.value}
+                                    className="rounded-md px-1.5 py-0.5 text-[10px] max-[520px]:text-[8px] font-medium"
+                                    style={{
+                                        background: preset === p.value ? "rgba(var(--glass-bg-rgb) / 0.15)" : "transparent",
+                                        color: preset === p.value ? "var(--text-primary)" : "var(--text-tertiary)",
+                                    }}
+                                    onClick={() => setPreset(p.value)}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                 </div>
             </div>
         </motion.div>

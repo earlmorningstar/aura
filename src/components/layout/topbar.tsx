@@ -22,8 +22,9 @@ import { cn } from "@/lib/utils";
 import { SubscriptionPill } from "@/components/billing/subscription-pill";
 import { useUser } from "@/hooks/use-user";
 import { NotificationBell } from "@/components/ui/notification-bell";
+import { usePathname } from "next/navigation";
 
-/* ─── Avatar ─────── */
+/* Avatar */
 
 interface AvatarButtonProps {
   online?: boolean;
@@ -78,7 +79,7 @@ function AvatarButton({ online = true }: { online?: boolean }) {
   );
 }
 
-/* ─── Ask Aura AI button ───── */
+/* Ask Aura AI button */
 
 function AskAuraButton() {
   const toggleAIOpen = useUIStore((s) => s.toggleAIOpen);
@@ -99,9 +100,11 @@ function AskAuraButton() {
   );
 }
 
-/* ─── Topbar ───── */
+/* Topbar */
 
 export function Topbar() {
+  const pathname = usePathname();
+  const isOverview = pathname === "/dashboard";
 
   return (
     <>
@@ -123,7 +126,7 @@ export function Topbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 280, damping: 26, delay: 0.1 }}
       >
-        <DateRangePicker />
+        {isOverview && <DateRangePicker />}
         <div className="flex-1" />
         <div className="flex items-center gap-2">
           <SubscriptionPill />
