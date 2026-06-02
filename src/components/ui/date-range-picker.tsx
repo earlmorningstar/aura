@@ -20,7 +20,7 @@ import { Calendar, ChevronDown, Check } from "lucide-react";
 import { useDateRangeStore } from "@/stores/date-range-store";
 import { cn } from "@/lib/utils";
 
-/* ─── Types ──────────────────────────────────────────────────────── */
+/*  Types */
 
 type PresetValue = "7d" | "30d" | "90d" | "1y" | "custom";
 
@@ -31,21 +31,25 @@ interface Preset {
   description: string;
 }
 
-/* ─── Preset config ──────────────────────────────────────────────── */
+interface DateRangePickerProps {
+  onPresetChange?: () => void;
+}
+
+/* Preset config */
 
 const PRESETS: Preset[] = [
-  { label: "Last 7 days",  shortLabel: "7D",  value: "7d",     description: "Past week" },
-  { label: "Last 30 days", shortLabel: "30D", value: "30d",    description: "Past month" },
-  { label: "Last 90 days", shortLabel: "90D", value: "90d",    description: "Past quarter" },
-  { label: "Last year",    shortLabel: "1Y",  value: "1y",     description: "Past 12 months" },
-  { label: "Custom range", shortLabel: "—",   value: "custom", description: "Pick your own dates" },
+  { label: "Last 7 days", shortLabel: "7D", value: "7d", description: "Past week" },
+  { label: "Last 30 days", shortLabel: "30D", value: "30d", description: "Past month" },
+  { label: "Last 90 days", shortLabel: "90D", value: "90d", description: "Past quarter" },
+  { label: "Last year", shortLabel: "1Y", value: "1y", description: "Past 12 months" },
+  { label: "Custom range", shortLabel: "—", value: "custom", description: "Pick your own dates" },
 ];
 
 function getPresetLabel(value: PresetValue): string {
   return PRESETS.find((p) => p.value === value)?.label ?? "Date range";
 }
 
-/* ─── Custom range inputs ────────────────────────────────────────── */
+/* Custom range inputs */
 
 interface CustomRangeProps {
   from: string;
@@ -110,13 +114,13 @@ function CustomRange({ from, to, onFrom, onTo }: CustomRangeProps) {
   );
 }
 
-/* ─── DateRangePicker ────────────────────────────────────────────── */
+/* DateRangePicker */
 
-export function DateRangePicker() {
+export function DateRangePicker({ onPresetChange }: DateRangePickerProps) {
   const { preset, setPreset } = useDateRangeStore();
-  const [open, setOpen]         = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const [customFrom, setCustomFrom] = React.useState("");
-  const [customTo, setCustomTo]     = React.useState("");
+  const [customTo, setCustomTo] = React.useState("");
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Close on outside click
@@ -140,24 +144,25 @@ export function DateRangePicker() {
   }, [open]);
 
   // Ensure the store contains the real current dates after hydration.
-// The store initially holds placeholder epoch dates; we overwrite them
-// with the real "30d" range once the component mounts on the client.
-React.useEffect(() => {
-  const { startDate, setPreset, preset } = useDateRangeStore.getState();
-  // Only initialise if the dates are still the placeholder
-  if (startDate.getTime() === 0) {
-    setPreset(preset);
-  }
-}, []);
+  // The store initially holds placeholder epoch dates; we overwrite them
+  // with the real "30d" range once the component mounts on the client.
+  React.useEffect(() => {
+    const { startDate, setPreset, preset } = useDateRangeStore.getState();
+    // Only initialise if the dates are still the placeholder
+    if (startDate.getTime() === 0) {
+      setPreset(preset);
+    }
+  }, []);
 
   function handlePresetSelect(value: PresetValue) {
     setPreset(value);
+    onPresetChange?.();
     if (value !== "custom") setOpen(false);
   }
 
   return (
     <div ref={containerRef} className="relative">
-      {/* ── Trigger button ──────────────────────────────────── */}
+      {/* Trigger button */}
       <motion.button
         className={cn(
           "flex h-9 items-center gap-2 rounded-xl px-3 text-sm font-medium outline-none",
@@ -198,7 +203,7 @@ React.useEffect(() => {
         </motion.span>
       </motion.button>
 
-      {/* ── Dropdown ────────────────────────────────────────── */}
+      {/* Dropdown */}
       <AnimatePresence>
         {open && (
           <motion.div

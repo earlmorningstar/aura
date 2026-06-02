@@ -96,7 +96,7 @@ export function MobileDashboardHeader() {
                     </div>
 
                     {/* Quick date pills */}
-                    {isOverview && (
+                    {/* {isOverview && (
                         <div className="flex items-center gap-0.5 rounded-lg p-0.5" style={{ background: "rgba(var(--glass-bg-rgb) / 0.05)" }}>
                             {PRESETS.map((p) => (
                                 <button
@@ -112,7 +112,7 @@ export function MobileDashboardHeader() {
                                 </button>
                             ))}
                         </div>
-                    )}
+                    )} */}
 
                 </div>
             </div>

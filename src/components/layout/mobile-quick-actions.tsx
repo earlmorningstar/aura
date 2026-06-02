@@ -93,7 +93,7 @@ export function MobileQuickActions() {
                 {/* Date range */}
                 <div>
                   <p className="mb-2 text-xs font-semibold text-muted uppercase">Date range</p>
-                  <DateRangePicker />
+                  <DateRangePicker onPresetChange={() => setOpen(false)} />
                 </div>
 
                 {/* Ask AI + Notifications */}
