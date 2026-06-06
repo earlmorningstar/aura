@@ -117,7 +117,7 @@ function WorkspaceSwitcher({
           <motion.ul
             role="listbox"
             aria-label="Select workspace"
-            className="absolute left-3 right-3 top-full z-[var(--z-dropdown)] mt-1 overflow-hidden rounded-xl py-1"
+            className="absolute left-3 right-3 top-full z-[var(--z-dropdown)] mt-1 rounded-xl py-1 overflow-visible" 
             style={{
               background: "rgba(10,10,18,0.92)",
               backdropFilter: "blur(var(--glass-blur-lg)) saturate(180%)",
